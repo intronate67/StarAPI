@@ -22,5 +22,75 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
+import com.gmail.socraticphoenix.sponge.star.StarMain;
+import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResult.Reason;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.command.CommandSource;
+
 public class ConversationTemplate {
+    private Prompt prompt;
+    private ChatFormat format;
+    private List<Text> initialMessages;
+    private Conversation.Handler handler;
+
+    public ConversationTemplate() {
+        this.initialMessages = new ArrayList<>();
+        this.handler = new Conversation.Handler() {
+            @Override
+            public void normalEnd(Conversation conversation) {
+
+            }
+
+            @Override
+            public void targetQuit(Conversation conversation) {
+
+            }
+
+            @Override
+            public void started(Conversation conversation) {
+
+            }
+        };
+    }
+
+    public ConversationTemplate setInitialPrompt(Prompt prompt) {
+        this.prompt = prompt;
+        return this;
+    }
+
+    public ConversationTemplate setChatFormat(ChatFormat format) {
+        this.format = format;
+        return this;
+    }
+
+    public ConversationTemplate addInitialMessage(Text... texts) {
+        for (Text text : texts) {
+            this.initialMessages.add(text);
+        }
+        return this;
+    }
+
+    public ConversationTemplate setHandler(Conversation.Handler handler) {
+        this.handler = handler;
+        return this;
+    }
+
+    public ConversationResult startWith(CommandSource target) {
+        ConversationManager manager = StarMain.getOperatingInstance().getConversationManager();
+        UUID id = manager.getFrom(target);
+        if (id == null) {
+            return new ConversationResult(Reason.UNKNOWN_COMMAND_SOURCE);
+        } else if (manager.containsKey(id)) {
+            return new ConversationResult(Reason.TARGET_IN_CONVERSATION);
+        } else {
+            Conversation conversation = new Conversation(this.prompt, target, id, this.format, this.handler, this.initialMessages.toArray(new Text[this.initialMessages.size()]));
+            manager.put(id, conversation);
+            return new ConversationResult(conversation);
+        }
+    }
+
 }

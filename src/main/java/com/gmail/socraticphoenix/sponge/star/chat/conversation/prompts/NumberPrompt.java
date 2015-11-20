@@ -20,13 +20,34 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.conversation;
+package com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifiers;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.AbstractPrompt;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Promptcessor;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 
-public interface Promptcessor {
+public class NumberPrompt extends AbstractPrompt {
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public NumberPrompt(Promptcessor promptcessor) {
+        super(promptcessor);
+    }
+
+    @Override
+    public Verifier getVerifier() {
+        return Verifiers.or(
+                Verifiers.type(Integer.class),
+                Verifiers.type(Double.class)
+        );
+    }
+
+    @Override
+    public Text getMessage() {
+        return Texts.builder("Please enter a number").color(TextColors.GOLD).build();
+
+    }
 
 }

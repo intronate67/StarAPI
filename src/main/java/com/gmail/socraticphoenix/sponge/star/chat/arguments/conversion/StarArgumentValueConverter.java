@@ -32,13 +32,13 @@ import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentList;
 
 public abstract class StarArgumentValueConverter<T> extends Constant {
     public static final StarArgumentValueConverter<String> STRING_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.STRING_CONVERTER);
-    public static final StarArgumentValueConverter<Object> NULL_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.NULL_CONVERTER);
     public static final StarArgumentValueConverter<Integer> INTEGER_CONVERTER = new IntegerConverter();
     public static final StarArgumentValueConverter<Boolean> BOOLEAN_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.BOOLEAN_CONVERTER);
     public static final StarArgumentValueConverter<Double> DOUBLE_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.DOUBLE_CONVERTER);
     public static final StarArgumentValueConverter<JSONObject> JSON_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.JSON_CONVERTER);
     public static final StarArgumentValueConverter<StarArgumentList> LIST_CONVERTER = new ListConverter();
     public static final StarArgumentValueConverter<HashString> HASH_STRING_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.HASH_STRING_CONVERTER);
+    public static final StarArgumentValueConverter<Object> NULL_CONVERTER = new AsacArgumentValueConverter<>(ASACValueConverter.NULL_CONVERTER);
 
     private Class<T> type;
 

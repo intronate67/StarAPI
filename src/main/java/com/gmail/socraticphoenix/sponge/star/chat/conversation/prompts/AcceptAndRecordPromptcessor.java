@@ -20,13 +20,26 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.conversation;
+package com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Promptcessor;
 
-public interface Promptcessor {
+public class AcceptAndRecordPromptcessor implements Promptcessor {
+    private String key;
+    private Prompt next;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public AcceptAndRecordPromptcessor(String key, Prompt next) {
+        this.key = key;
+        this.next = next;
+    }
+
+    @Override
+    public Prompt process(StarArgumentValue value, Conversation conversation) {
+        conversation.getArguments().put(this.key, value.getValue().orElse(null));
+        return this.next;
+    }
 
 }

@@ -23,6 +23,8 @@
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
 import com.gmail.socraticphoenix.plasma.collection.KeyValue;
+import com.gmail.socraticphoenix.plasma.math.PlasmaMathUtil;
+import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
@@ -47,13 +49,14 @@ public class Conversation {
     private Handler handler;
     private UUID id;
 
-    public Conversation(Prompt first, CommandSource target, UUID id, ChatFormat format, Handler handler, Text... initialMessages) {
+    Conversation(Prompt first, CommandSource target, UUID id, ChatFormat format, Handler handler, Text... initialMessages) {
         this.current = first;
         this.target = target;
         this.handler = handler;
         this.arguments = new StarArguments();
         this.initialMessages = initialMessages;
         this.id = id;
+        this.format = format;
     }
 
     public StarArguments getArguments() {
@@ -65,28 +68,58 @@ public class Conversation {
         this.handler.started(this);
         this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         while (this.current instanceof Prompt.Message) {
-            this.current = this.current.process(StarArgumentValue.of(null), this);
+            this.current = this.current.getProcessor().process(StarArgumentValue.of(null), this);
             this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         }
     }
 
     public void end() {
+        StarMain.getOperatingInstance().getConversationManager().remove(this.id);
+        this.handler.normalEnd(this);
+    }
 
+    public void targetQuitEnd() {
+        StarMain.getOperatingInstance().getConversationManager().remove(this.id);
+        this.handler.targetQuit(this);
     }
 
     public void step(String message) {
+        message = PlasmaStringUtil.removeTrailingSpaces(message);
         Verifier verifier = this.current.getVerifier();
-        StarArgumentKeyValue keyValue = StarArgumentKeyValue.parse("value", message);
-        VerificationResult result = verifier.verify(keyValue);
+        StarArgumentValue value = StarArgumentValue.parse(message);
+        VerificationResult result = verifier.verify(new StarArgumentKeyValue("value", value));
         if (result.getType() == Type.SUCCESS) {
-            this.current = this.current.process(keyValue, this);
+            this.current = this.current.getProcessor().process(value, this);
             if (this.current == Prompt.END) {
                 this.end();
+                return;
+            } else if (this.current instanceof Prompt.Message) {
+                while (this.current instanceof Prompt.Message) {
+                    this.current = this.current.getProcessor().process(StarArgumentValue.of(null), this);
+                    this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
+                }
             }
-            this.target.sendMessage(this.current.getMessage());
+            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         } else if (result.getType() == Type.FAILURE) {
-            this.target.sendMessage(result.getMessage());
+            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, result.getMessage())));
+            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         }
+    }
+
+    public static ConversationTemplate template() {
+        return new ConversationTemplate();
+    }
+
+    public CommandSource getTarget() {
+        return target;
+    }
+
+    public ChatFormat getFormat() {
+        return format;
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 
     public interface Handler {
@@ -94,8 +127,6 @@ public class Conversation {
         void normalEnd(Conversation conversation);
 
         void targetQuit(Conversation conversation);
-
-        void nullPrompt(Conversation conversation);
 
         void started(Conversation conversation);
 

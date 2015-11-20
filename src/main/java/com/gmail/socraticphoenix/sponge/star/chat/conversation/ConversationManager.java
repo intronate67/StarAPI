@@ -25,6 +25,9 @@ package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public class ConversationManager {
     private Map<UUID, Conversation> conversations;
@@ -45,4 +48,17 @@ public class ConversationManager {
         this.conversations.put(player, conversation);
     }
 
+    public void remove(UUID player) {
+        this.conversations.remove(player);
+    }
+
+    public UUID getFrom(CommandSource source) {
+        if(source instanceof Player) {
+            return ((Player) source).getUniqueId();
+        } else if (source instanceof ConsoleSource) {
+            return Conversation.CONSOLE_ID;
+        } else {
+            return null;
+        }
+    }
 }

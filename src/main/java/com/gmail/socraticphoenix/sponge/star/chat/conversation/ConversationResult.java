@@ -22,11 +22,39 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import java.util.Optional;
 
-public interface Promptcessor {
+public class ConversationResult {
+    private boolean successful;
+    private Reason reason;
+    private Conversation conversation;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public ConversationResult(Reason reason) {
+        this.successful = false;
+        this.reason = reason;
+    }
 
+    public ConversationResult(Conversation conversation) {
+        this.conversation = conversation;
+        this.reason = Reason.SUCCESSFUL;
+        this.successful = true;
+    }
+
+    public Optional<Conversation> getConversation() {
+        return Optional.ofNullable(this.conversation);
+    }
+
+    public boolean wasSuccessful() {
+        return this.successful;
+    }
+
+    public Reason getReason() {
+        return reason;
+    }
+
+    public enum Reason {
+        UNKNOWN_COMMAND_SOURCE,
+        TARGET_IN_CONVERSATION,
+        SUCCESSFUL
+    }
 }

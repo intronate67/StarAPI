@@ -28,6 +28,7 @@ public enum  StarLang {
     CONFIG_NAME("config.asac"),
     DATA_NAME("data.cif"),
     INFORMATION_NAME("info.txt"),
+    LANGUAGE_NAME("lang.asac")
 
     ;
 

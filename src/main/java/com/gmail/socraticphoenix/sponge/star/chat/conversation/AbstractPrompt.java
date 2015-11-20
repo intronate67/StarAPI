@@ -22,11 +22,22 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
 
-public interface Promptcessor {
+public abstract class AbstractPrompt extends Prompt {
+    private Promptcessor promptcessor;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public AbstractPrompt(Promptcessor promptcessor) {
+        this.promptcessor = promptcessor;
+    }
 
+    @Override
+    public Promptcessor getProcessor() {
+        return this.promptcessor;
+    }
+
+    @Override
+    public Prompt process(StarArgumentValue keyValue, Conversation conversation) {
+        return this.promptcessor.process(keyValue, conversation);
+    }
 }

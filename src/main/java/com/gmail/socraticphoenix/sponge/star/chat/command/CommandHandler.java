@@ -23,10 +23,16 @@
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
 import com.gmail.socraticphoenix.sponge.star.StarMain;
+import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentTokenizer;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarKeyConsumer;
+import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.CommandConversationHandler;
+import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.InitialCommandPrompt;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationTemplate;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -133,12 +139,21 @@ public abstract class CommandHandler {
         StarMain.getOperatingInstance().getGame().getCommandDispatcher().register(StarMain.getOperatingInstance(), this.toSponge(), names);
     }
 
+    public boolean hasPermissions(CommandSource source) {
+        for (String perm : this.getPermissions()) {
+            if(source.hasPermission(perm)) {
+                return true;
+            }
+        }
+        return this.getPermissions().length <= 0;
+    }
+
     public SpongeCommand toSponge() {
         return new SpongeCommand(this);
     }
 
-    public Object toConversation() { //TODO add once conversation API has been created/implemented
-        return null;
+    public ConversationTemplate toConversation(ChatFormat format, Text... initialMessages) {
+        return Conversation.template().setChatFormat(format).setHandler(new CommandConversationHandler(this)).addInitialMessage(initialMessages).setInitialPrompt(new InitialCommandPrompt(this));
     }
 
 }

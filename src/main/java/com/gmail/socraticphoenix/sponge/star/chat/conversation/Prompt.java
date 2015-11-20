@@ -33,15 +33,7 @@ public abstract class Prompt implements Promptcessor {
 
     public abstract Verifier getVerifier();
 
-    public Prompt process(StarArgumentKeyValue keyValue, Conversation conversation) {
-        return this;
-    }
-
     public abstract Text getMessage();
-
-    public Prompt evaluate(StarArgumentValue keyValue, Conversation conversation) {
-        return this.getProcessor().process(keyValue, conversation);
-    }
 
     public Promptcessor getProcessor() {
         return this;

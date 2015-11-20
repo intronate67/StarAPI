@@ -29,12 +29,16 @@ import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValue;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValueList;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
+import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationStartCommand;
+import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationEndCommand;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationListener;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
 import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
 import com.gmail.socraticphoenix.sponge.star.serialization.cif.CIFSerializers;
 import com.google.inject.Inject;
+import java.io.IOException;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.*;
@@ -44,6 +48,8 @@ import com.gmail.socraticphoenix.sponge.star.plugin.StarPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.spongepowered.api.service.ProviderExistsException;
+import org.spongepowered.api.service.ServiceManager;
 
 @Plugin (id = "starApi", name = "StarAPI", version = "0.1")
 @PluginInformation(authors = {"Socratic_Phoenix"}, description = "StarAPI is a Sponge Plugin framework that aims to make plugin interactions with the player smooth, and enable them to do things such as control NPCs and create minigame Lobbies.")
@@ -68,7 +74,12 @@ public class StarMain extends StarPlugin {
     @Override
     @Listener
     public void onPreInitialization(GamePreInitializationEvent ev) {
-
+        try {
+            ServiceManager manager = this.game.getServiceManager();
+            manager.setProvider(this, ConversationManager.class, this.getConversationManager());
+        } catch (ProviderExistsException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -79,6 +90,10 @@ public class StarMain extends StarPlugin {
 
     @Listener
     public void onServerStartingEvent(GameStartedServerEvent ev) {
+        this.game.getEventManager().registerListeners(this, new ConversationListener());
+        new ConversationEndCommand().registerAsSpongeCommand("end");
+        new ConversationStartCommand().registerAsSpongeCommand("conversation");
+
         Optional<ASACNode> asacNodeOptional = this.getConfig().getNode("Lobbies");
         if(asacNodeOptional.isPresent()) {
             ASACNode lobbies = asacNodeOptional.get();
@@ -106,7 +121,13 @@ public class StarMain extends StarPlugin {
     @Override
     @Listener
     public void onServerStopped(GameStoppedServerEvent ev) {
-
+        try {
+            this.saveConfig();
+            this.saveData();
+            this.saveLanguageMapping();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

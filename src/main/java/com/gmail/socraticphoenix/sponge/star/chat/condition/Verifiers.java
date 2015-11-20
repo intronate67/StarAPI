@@ -41,6 +41,42 @@ public class Verifiers {
         return Verifiers.successful;
     }
 
+    public static Verifier equalTo(Object... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(int... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(short... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(long... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(float... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(double... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(boolean... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(byte... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
+    public static Verifier equalTo(char... possibleValues) {
+        return new EqualToOneVerifier(possibleValues);
+    }
+
     public static Verifier enumValue(Class<? extends Enum<?>> target) {
         return new EnumVerifier(target);
     }

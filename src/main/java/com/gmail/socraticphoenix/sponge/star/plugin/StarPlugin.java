@@ -45,6 +45,7 @@ import java.lang.annotation.Annotation;
 public abstract class StarPlugin {
     private ASACNode config;
     private CIFTagCompound data;
+    private LanguageMapping languageMapping;
 
     private Logger logger;
 
@@ -62,6 +63,7 @@ public abstract class StarPlugin {
             this.initializeLogger();
             this.initializeConfig();
             this.initializeData();
+            this.initializeLanguage();
             this.writeInformationFile();
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -126,6 +128,10 @@ public abstract class StarPlugin {
         return this.logger;
     }
 
+    public void saveLanguageMapping() throws IOException {
+        this.languageMapping.toAsac().writeToFile(new File(this.configDir, StarLang.LANGUAGE_NAME.toString()));
+    }
+
     public void saveConfig() throws IOException {
         this.config.writeToFile(new File(this.configDir, StarLang.CONFIG_NAME.toString()));
     }
@@ -136,6 +142,10 @@ public abstract class StarPlugin {
 
     public CIFTagCompound getData() {
         return this.data;
+    }
+
+    public LanguageMapping getLanguageMapping() {
+        return this.languageMapping;
     }
 
     public void saveData() throws IOException {
@@ -171,6 +181,17 @@ public abstract class StarPlugin {
 
             thread.close();
         }
+    }
+
+    private void initializeLanguage() throws IOException, ASACException {
+        File language = new File(this.configDir, StarLang.LANGUAGE_NAME.toString());
+        if(language.exists()) {
+            this.languageMapping = LanguageMapping.fromAsac(ASACParser.parseFile(language, null));
+        } else {
+            this.languageMapping = new LanguageMapping();
+        }
+
+        this.saveLanguageMapping();
     }
 
     private void initializeData() throws IOException, CIFException {

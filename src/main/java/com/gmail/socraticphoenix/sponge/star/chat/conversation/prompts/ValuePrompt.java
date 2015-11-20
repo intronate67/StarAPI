@@ -20,13 +20,32 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.conversation;
+package com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifiers;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.AbstractPrompt;
 
-public interface Promptcessor {
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Promptcessor;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+public class ValuePrompt extends AbstractPrompt  {
+    private Class<?> requiredType;
 
+    public ValuePrompt(Promptcessor promptcessor, Class<?> requiredType) {
+        super(promptcessor);
+        this.requiredType = requiredType;
+    }
+
+    @Override
+    public Verifier getVerifier() {
+        return Verifiers.type(requiredType);
+    }
+
+    @Override
+    public Text getMessage() {
+        return Texts.builder("Please enter a(n) '".concat(this.requiredType.getSimpleName()).concat("'")).color(TextColors.GOLD).build();
+    }
 }

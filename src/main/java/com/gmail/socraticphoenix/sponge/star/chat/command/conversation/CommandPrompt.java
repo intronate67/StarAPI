@@ -20,13 +20,41 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.conversation;
+package com.gmail.socraticphoenix.sponge.star.chat.command.conversation;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt;
+import java.util.Deque;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 
-public interface Promptcessor {
+public class CommandPrompt extends Prompt {
+    private Deque<Prompt> prompts;
+    private String argName;
+    private Verifier verifier;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public CommandPrompt(Deque<Prompt> prompts, String argName, Verifier verifier) {
+        this.prompts = prompts;
+        this.argName = argName;
+        this.verifier = verifier;
+    }
 
+    @Override
+    public Verifier getVerifier() {
+        return this.verifier;
+    }
+
+    @Override
+    public Text getMessage() {
+        return Texts.builder("Please enter '".concat(this.argName).concat("'")).color(TextColors.GOLD).build();
+    }
+
+    @Override
+    public Prompt process(StarArgumentValue value, Conversation conversation) {
+        conversation.getArguments().put(this.argName, value.getValue().orElse(null));
+        return this.prompts.isEmpty() ? Prompt.END : this.prompts.pollFirst();
+    }
 }

@@ -22,12 +22,14 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
+import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentParser;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Conditions;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult.Type;
+import com.gmail.socraticphoenix.sponge.star.plugin.LanguageMapping;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -41,8 +43,10 @@ import org.spongepowered.api.util.command.CommandSource;
 
 public class SpongeCommand implements CommandCallable {
     private CommandHandler handler;
+    private LanguageMapping mapping;
 
     public SpongeCommand(CommandHandler handler) {
+        this.mapping = StarMain.getOperatingInstance().getLanguageMapping();
         this.handler = handler;
         if(!handler.isValid()) {
             throw new IllegalArgumentException("Invalid CommandHandler '".concat(handler.getClass().getName()).concat("' (invalidLengths=".concat(String.valueOf(handler.containsAcceptableLengths()))).concat(", invalidDefaults:".concat(String.valueOf(handler.containsAcceptableDefaults()))).concat(")"));
@@ -51,21 +55,25 @@ public class SpongeCommand implements CommandCallable {
 
     @Override
     public CommandResult process(CommandSource source, String arguments) throws CommandException {
-        int length = StarArgumentParser.lengthOf(arguments, this.handler.getTokenizingHandler(source));
-        if(this.handler.isApplicableLength(length)) {
-            StarArguments args = StarArgumentParser.parse(arguments, this.handler.getTokenizingHandler(source), this.handler.getDefaultsForLength(length).get());
-            ConditionSet set = this.handler.getConditions();
-            VerificationResult result = Conditions.runConditions(set, args);
-            if(result.getType() == Type.SUCCESS) {
-                return this.handler.execute(source, args, arguments);
-            } else if(result.getType() == Type.FAILURE) {
-                source.sendMessage(result.getMessage());
+        if(this.handler.hasPermissions(source)) {
+            int length = StarArgumentParser.lengthOf(arguments, this.handler.getTokenizingHandler(source));
+            if (this.handler.isApplicableLength(length)) {
+                StarArguments args = StarArgumentParser.parse(arguments, this.handler.getTokenizingHandler(source), this.handler.getDefaultsForLength(length).get());
+                ConditionSet set = this.handler.getConditions();
+                VerificationResult result = Conditions.runConditions(set, args);
+                if (result.getType() == Type.SUCCESS) {
+                    return this.handler.execute(source, args, arguments);
+                } else if (result.getType() == Type.FAILURE) {
+                    source.sendMessage(result.getMessage());
+                    this.handler.displayHelpTo(source);
+                    return CommandResult.empty();
+                }
+            } else {
+                source.sendMessage(Texts.builder().color(mapping.query("error-message-color", TextColors.RED)).append(Texts.of("Improper amount of arguments (".concat(String.valueOf(length)).concat(")! Acceptable lengths: ").concat(Arrays.toString(this.handler.getLengths())))).build());
                 this.handler.displayHelpTo(source);
-                return CommandResult.empty();
             }
         } else {
-            source.sendMessage(Texts.builder().color(TextColors.RED).append(Texts.of("Improper amount of arguments (".concat(String.valueOf(length)).concat(")! Acceptable lengths: ").concat(Arrays.toString(this.handler.getLengths())))).build());
-            this.handler.displayHelpTo(source);
+            source.sendMessage(Texts.builder(mapping.query("perm-message", "You don't have permission to do that!")).color(mapping.query("error-message-color", TextColors.RED)).build());
         }
         return CommandResult.empty();
     }
@@ -93,5 +101,9 @@ public class SpongeCommand implements CommandCallable {
     @Override
     public Text getUsage(CommandSource source) {
         return this.handler.getInfo().getUsage();
+    }
+
+    public CommandHandler getHandler() {
+        return this.handler;
     }
 }

@@ -20,13 +20,37 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.conversation;
+package com.gmail.socraticphoenix.sponge.star.chat.command.conversation;
 
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
+import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
+import com.gmail.socraticphoenix.sponge.star.chat.command.CommandHandler;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.command.CommandSource;
 
-public interface Promptcessor {
+public class CommandConversationHandler implements Conversation.Handler {
+    private CommandHandler handler;
 
-    Prompt process(StarArgumentValue value, Conversation conversation);
+    public CommandConversationHandler(CommandHandler handler) {
+        this.handler = handler;
+    }
+
+    @Override
+    public void normalEnd(Conversation conversation) {
+        StarArguments arguments = conversation.getArguments();
+        CommandSource source = conversation.getTarget();
+        this.handler.execute(source, arguments, arguments.toString());
+    }
+
+    @Override
+    public void targetQuit(Conversation conversation) {
+        conversation.getTarget().sendMessage(Texts.builder("Cancelled command execution").color(TextColors.LIGHT_PURPLE).build());
+    }
+
+    @Override
+    public void started(Conversation conversation) {
+
+    }
 
 }
