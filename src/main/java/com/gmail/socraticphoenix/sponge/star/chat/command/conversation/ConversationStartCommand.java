@@ -52,7 +52,7 @@ public class ConversationStartCommand extends CommandHandler {
         CommandService service = StarMain.getOperatingInstance().getGame().getCommandDispatcher();
         CommandMapping mapping = service.get(command).get();
         SpongeCommand spongeCommand = (SpongeCommand) mapping.getCallable();
-        ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Texts.builder("Indigo> ").color(TextColors.AQUA).build()).literal(Texts.builder().color(TextColors.YELLOW).build()).variable(Conversation.PROMPT_KEY).build());
+        ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Texts.builder("Indigo> ").color(TextColors.LIGHT_PURPLE).build()).literal(Texts.builder().color(TextColors.YELLOW).build()).variable(Conversation.PROMPT_KEY).build());
         ConversationResult result = template.startWith(source);
         if(!result.wasSuccessful()) {
             ConversationResult.Reason reason = result.getReason();

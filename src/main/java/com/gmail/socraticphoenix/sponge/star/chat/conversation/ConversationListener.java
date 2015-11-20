@@ -34,6 +34,7 @@ import org.spongepowered.api.event.command.MessageSinkEvent;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.command.CommandSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 
@@ -48,6 +49,7 @@ public class ConversationListener {
             UUID id = manager.getFrom(playerOptional.get());
             if(manager.containsKey(id)) {
                 String message = Texts.toPlain(event.getRawMessage());
+                playerOptional.get().sendMessage(Texts.builder(playerOptional.get().getName()).append(Texts.of("> ")).append(Texts.of(message)).color(StarMain.getOperatingInstance().getLanguageMapping().query("conversation-entry-color", TextColors.GRAY)).build());
                 manager.get(id).step(message);
                 event.setCancelled(true);
             }
