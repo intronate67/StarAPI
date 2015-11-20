@@ -28,6 +28,8 @@ import com.gmail.socraticphoenix.plasma.file.asac.annotation.ASACAnnotation;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValue;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValueList;
+import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
 import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
@@ -51,13 +53,16 @@ public class StarMain extends StarPlugin {
     @Inject
     private Game game;
     private List<Lobby> lobbies;
+    private ConversationManager conversationManager;
 
     @Override
     public void onConstruction() {
         this.lobbies = new ArrayList<>();
+        this.conversationManager = new ConversationManager();
         StarMain.starMain = this;
         ASACSerializers.init();
         CIFSerializers.init();
+        StarArgumentValueConverter.init();
     }
 
     @Override
@@ -113,6 +118,10 @@ public class StarMain extends StarPlugin {
         ASACKeyValue keyValue = new ASACKeyValue("LobbyWorlds", ASACValueList.buildList(lobbies, value));
         lobbies.putKeyValue(keyValue);
         node.putNode(lobbies);
+    }
+
+    public ConversationManager getConversationManager() {
+        return conversationManager;
     }
 
     public Game getGame() {

@@ -75,6 +75,7 @@ public abstract class StarPlugin {
         this.logger.info("description= ".concat(this.description));
         this.logger.info("------------------------------");
 
+
         this.onConstruction();
     }
 

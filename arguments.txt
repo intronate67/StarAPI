@@ -1,0 +1,40 @@
+Syntax Specification for Arguments
+
+Goals:
+    1. Allow the default arguments style to continue to be used (/<command> <arg1> <arg2> <agr3>... (split by spaces)) while also:
+    2. Implementing more versatile styles, as well as more advanced parsing
+    3. Making it easy for both the developer and the user to interact with the system
+
+
+Specification:
+
+Arguments can be give in 2 forms, listed and mapped. Listed is a list of values, mapped is a set of mappings. The two types CANNOT be mixed.
+
+Type 1, ordered:
+    - Values appear in a list separated by commas and/or spaces
+    - Examples:
+        - /test 1 2 3
+        - /test 1, 2, 3
+        - /test 1, 2 3
+    - The API should internally assign default names to the values, as specified by the command specification
+
+Type 2, unordered:
+    - Values appear in a list of key-value mappings, separated by commas and/or spaces. Key-value mappings should be separated with colons.
+    - Examples:
+        - /test last:3 second:2 first:1
+        - /test last:3, first:1, second:2
+        - /test last:3, first:1 second:2
+
+Additional Notes:
+    "/test 1 2 3" is equivalent to "/test last:3, second:2, first:1" because the default order of values
+     for the arguments is "first, second, last", therefore the parser should assign "1" to "first," "2" to "second," and
+     "3" to "last" in the first example. In the second example, the default order of values is not used, but rather
+     all values are directly mapped.
+
+     If deeper data is needed, JSON should be used as an argument value, for example:
+     /test detail:{"key":"value"}, last:3, first:1, second:2
+
+     Additionally, if a list is needed list form should be used:
+     /test list:[1, 2, 3, 4, 5] last:3 first:1 second:2
+     List form follows the same rules and specifications as listed argument form, except their values' 'default names' are integers that specify the index in the list
+
