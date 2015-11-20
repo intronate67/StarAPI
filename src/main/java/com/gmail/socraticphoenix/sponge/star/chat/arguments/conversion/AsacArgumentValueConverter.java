@@ -58,4 +58,9 @@ public class AsacArgumentValueConverter<T> extends StarArgumentValueConverter<T>
     public boolean canParse(String value) {
         return this.converter.canConvertFromString(value);
     }
+
+    @Override
+    public boolean canWrite(Object object) {
+        return this.converter.canConvertToString(object);
+    }
 }
