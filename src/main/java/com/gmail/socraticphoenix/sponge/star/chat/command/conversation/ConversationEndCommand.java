@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command.conversation;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarKeyConsumer;
@@ -46,7 +47,7 @@ public class ConversationEndCommand extends CommandHandler {
         if(manager.containsKey(id)) {
             manager.get(id).targetQuitEnd();
         } else {
-            source.sendMessage(Texts.builder("You aren't in a conversation!").color(TextColors.RED).build());
+            source.sendMessage(Texts.builder("You aren't in a conversation!").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
         }
 
         return CommandResult.success();

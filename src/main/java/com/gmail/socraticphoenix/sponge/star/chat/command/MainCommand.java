@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.gmail.socraticphoenix.sponge.star.Star;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
@@ -69,7 +71,7 @@ public class MainCommand implements CommandCallable {
         if(subCommand.isPresent()) {
             return subCommand.get().process(source, argString);
         } else {
-            source.sendMessage(Texts.builder("Sub-command '".concat(command).concat("' was not found")).color(TextColors.RED).build());
+            source.sendMessage(Texts.builder("Sub-command '".concat(command).concat("' was not found")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             return CommandResult.empty();
         }
     }

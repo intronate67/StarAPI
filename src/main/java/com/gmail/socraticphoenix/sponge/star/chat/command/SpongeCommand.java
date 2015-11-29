@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentParser;
@@ -43,10 +44,8 @@ import org.spongepowered.api.util.command.CommandSource;
 
 public class SpongeCommand implements CommandCallable {
     private CommandHandler handler;
-    private LanguageMapping mapping;
 
     public SpongeCommand(CommandHandler handler) {
-        this.mapping = StarMain.getOperatingInstance().getLanguageMapping();
         this.handler = handler;
         if(!handler.isValid()) {
             throw new IllegalArgumentException("Invalid CommandHandler '".concat(handler.getClass().getName()).concat("' (invalidLengths=".concat(String.valueOf(handler.containsAcceptableLengths()))).concat(", invalidDefaults:".concat(String.valueOf(handler.containsAcceptableDefaults()))).concat(")"));
@@ -69,11 +68,11 @@ public class SpongeCommand implements CommandCallable {
                     return CommandResult.empty();
                 }
             } else {
-                source.sendMessage(Texts.builder().color(mapping.query("error-message-color", TextColors.RED)).append(Texts.of("Improper amount of arguments (".concat(String.valueOf(length)).concat(")! Acceptable lengths: ").concat(Arrays.toString(this.handler.getLengths())))).build());
+                source.sendMessage(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).append(Texts.of("Improper amount of arguments (".concat(String.valueOf(length)).concat(")! Acceptable lengths: ").concat(Arrays.toString(this.handler.getLengths())))).build());
                 this.handler.displayHelpTo(source);
             }
         } else {
-            source.sendMessage(mapping.query("perm-message", "You don't have permission to do that!").builder().color(mapping.query("error-message-color", TextColors.RED)).build());
+            source.sendMessage(Star.getStarMain().getLanguageMapping().query("perm-message", "You don't have permission to do that!").builder().color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
         }
         return CommandResult.empty();
     }
