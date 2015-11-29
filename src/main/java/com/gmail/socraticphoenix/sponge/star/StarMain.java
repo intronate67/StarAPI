@@ -22,32 +22,23 @@
  */
 package com.gmail.socraticphoenix.sponge.star;
 
-import com.gmail.socraticphoenix.plasma.file.asac.ASACList;
-import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
-import com.gmail.socraticphoenix.plasma.file.asac.annotation.ASACAnnotation;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValue;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValueList;
+import com.gmail.socraticphoenix.plasma.file.cif.io.CIFException;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationStartCommand;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationEndCommand;
-import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationListener;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
-import com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby;
 import com.gmail.socraticphoenix.sponge.star.minigame.util.CooldownManager;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
 import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
 import com.gmail.socraticphoenix.sponge.star.serialization.cif.CIFSerializers;
 import com.google.inject.Inject;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.*;
-import org.spongepowered.api.event.world.ConstructWorldEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import com.gmail.socraticphoenix.sponge.star.plugin.StarPlugin;
 
@@ -98,6 +89,7 @@ public class StarMain extends StarPlugin {
     @Override
     @Listener
     public void onInitialization(GameInitializationEvent ev) {
+
         new ConversationStartCommand().registerAsSpongeCommand("star.conversation.start");
         new ConversationEndCommand().registerAsSpongeCommand("star.conversation.end");
     }
@@ -114,7 +106,7 @@ public class StarMain extends StarPlugin {
             this.saveConfig();
             this.saveData();
             this.saveLanguageMapping();
-        } catch (IOException e) {
+        } catch (IOException | CIFException e) {
             e.printStackTrace();
         }
     }

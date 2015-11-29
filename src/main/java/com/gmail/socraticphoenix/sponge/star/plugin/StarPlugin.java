@@ -27,6 +27,9 @@ import com.gmail.socraticphoenix.plasma.file.asac.ASACException;
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
 import com.gmail.socraticphoenix.plasma.file.asac.ASACParser;
 import com.gmail.socraticphoenix.plasma.file.cif.CIFTagCompound;
+import com.gmail.socraticphoenix.plasma.file.cif.cifc.CIFCConfiguration;
+import com.gmail.socraticphoenix.plasma.file.cif.cifc.io.CIFCReader;
+import com.gmail.socraticphoenix.plasma.file.cif.cifc.io.CIFCWriter;
 import com.gmail.socraticphoenix.plasma.file.cif.io.CIFException;
 import com.gmail.socraticphoenix.plasma.file.cif.util.CIFUtil;
 import com.gmail.socraticphoenix.sponge.star.StarLang;
@@ -43,7 +46,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 public abstract class StarPlugin {
-    private ASACNode config;
+    private CIFCConfiguration config;
     private CIFTagCompound data;
     private LanguageMapping languageMapping;
 
@@ -115,7 +118,7 @@ public abstract class StarPlugin {
         return this.version;
     }
 
-    public ASACNode getConfig() {
+    public CIFCConfiguration getConfig() {
         return this.config;
     }
 
@@ -127,15 +130,15 @@ public abstract class StarPlugin {
         return this.logger;
     }
 
-    public void saveLanguageMapping() throws IOException {
-        this.languageMapping.toAsac().writeToFile(new File(this.configDir, StarLang.LANGUAGE_NAME.toString()));
+    public void saveLanguageMapping() throws IOException, CIFException {
+        CIFCWriter.writeToFile(new File(this.configDir, StarLang.LANGUAGE_NAME.toString()), this.languageMapping.toCif());
     }
 
-    public void saveConfig() throws IOException {
-        this.config.writeToFile(new File(this.configDir, StarLang.CONFIG_NAME.toString()));
+    public void saveConfig() throws IOException, CIFException {
+        CIFCWriter.writeToFile(new File(this.configDir, StarLang.CONFIG_NAME.toString()), this.config);
     }
 
-    public void reloadConfig() throws IOException, ASACException {
+    public void reloadConfig() throws IOException, CIFException {
         this.initializeConfig();
     }
 
@@ -146,7 +149,7 @@ public abstract class StarPlugin {
     public LanguageMapping getLanguageMapping() {
         try {
             this.initializeLanguage(); //Lazy loading because Sponge TextColors aren't available on construction
-        } catch (IOException | ASACException e) {
+        } catch (IOException | CIFException e) {
             e.printStackTrace();
         }
         return this.languageMapping;
@@ -160,11 +163,11 @@ public abstract class StarPlugin {
         this.logger = LoggerFactory.getLogger(this.id);
     }
 
-    protected void putDefaultValues(ASACNode node) {
+    protected void putDefaultConfigValues(CIFCConfiguration node) {
 
     }
 
-    protected void putDefaultValues(CIFTagCompound data) {
+    protected void putDefaultDataValues(CIFTagCompound data) {
 
     }
 
@@ -187,10 +190,10 @@ public abstract class StarPlugin {
         }
     }
 
-    private void initializeLanguage() throws IOException, ASACException {
+    private void initializeLanguage() throws IOException, CIFException {
         File language = new File(this.configDir, StarLang.LANGUAGE_NAME.toString());
         if(language.exists()) {
-            this.languageMapping = LanguageMapping.fromAsac(ASACParser.parseFile(language, null));
+            this.languageMapping = LanguageMapping.fromCif(CIFCReader.readFromFile(language).getRoot());
         } else {
             this.languageMapping = new LanguageMapping();
         }
@@ -204,24 +207,24 @@ public abstract class StarPlugin {
             this.data = CIFUtil.parseFromFile(data, true);
         } else {
             this.data = new CIFTagCompound();
-            this.putDefaultValues(this.data);
+            this.putDefaultDataValues(this.data);
         }
         CIFUtil.writeToFile(data, this.data, true);
     }
 
-    private void initializeConfig() throws IOException, ASACException {
+    private void initializeConfig() throws IOException, CIFException {
         File modDir = new File(StarLang.CONFIG_DIR.toString());
         File localDir = new File(modDir, this.name);
         this.configDir = localDir;
         this.configDir.mkdirs();
         File config = new File(localDir, StarLang.CONFIG_NAME.toString());
         if(config.exists()) {
-            this.config = ASACParser.parseFile(config, null);
+            this.config = CIFCReader.readFromFile(config);
         } else {
-            this.config = new ASACNode("Config");
-            this.putDefaultValues(this.config);
+            this.config = new CIFCConfiguration();
+            this.putDefaultConfigValues(this.config);
         }
-        this.config.writeToFile(new File(this.configDir, StarLang.CONFIG_NAME.toString()));
+        this.saveConfig();
     }
 
     private void grabFromAnnotation() {

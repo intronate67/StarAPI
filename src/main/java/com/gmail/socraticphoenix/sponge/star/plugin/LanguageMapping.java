@@ -24,6 +24,11 @@ package com.gmail.socraticphoenix.sponge.star.plugin;
 
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
+import com.gmail.socraticphoenix.plasma.file.cif.CIFTagCompound;
+import com.gmail.socraticphoenix.plasma.file.cif.cifc.CIFCConfiguration;
+import com.gmail.socraticphoenix.plasma.file.cif.tags.CIFContentType;
+import com.gmail.socraticphoenix.plasma.file.cif.tags.CIFTag;
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,26 +46,23 @@ public class LanguageMapping {
         this.messages = new LinkedHashMap<>();
     }
 
-    public static LanguageMapping fromAsac(ASACNode node) {
+    public static LanguageMapping fromCif(CIFTagCompound compound) {
         LanguageMapping mapping = new LanguageMapping();
-        Optional<ASACNode> colorOptional = node.getNode("Colors");
-        Optional<ASACNode> messageOptional = node.getNode("Messages");
-        if (colorOptional.isPresent()) {
-            for (ASACKeyValue keyValue : colorOptional.get().getAllValues()) {
-                String key = keyValue.getKey();
-                if (keyValue.getSingletonValue().getObjectValue().isPresent() && keyValue.getSingletonValue().getObjectValue().get() instanceof String && StarMain.getOperatingInstance().getGame().getRegistry().getType(TextColor.class, keyValue.getSingletonValue().getObjectValue().get().toString()).isPresent()) {
-                    TextColor value = StarMain.getOperatingInstance().getGame().getRegistry().getType(TextColor.class, String.valueOf(keyValue.getSingletonValue().getObjectValue().get())).get();
-                    mapping.query(key, value);
+        Optional<CIFTag<CIFTagCompound>> colorOptional = compound.getCompound("Colors");
+        Optional<CIFTag<CIFTagCompound>> messageOptional = compound.getCompound("Messages");
+        if(colorOptional.isPresent()) {
+            for(CIFTag tag : colorOptional.get().getValue()) {
+                if(tag.getTagType() == CIFContentType.STRING && Star.getGameRegistry().getType(TextColor.class, String.valueOf(tag.getValue())).isPresent()) {
+                    TextColor value = Star.getGameRegistry().getType(TextColor.class, String.valueOf(tag.getValue())).get();
+                    mapping.query(tag.getName(), value);
                 }
             }
         }
 
         if(messageOptional.isPresent()) {
-            for(ASACKeyValue keyValue : messageOptional.get().getAllValues()) {
-                String key = keyValue.getKey();
-                if(keyValue.getSingletonValue().getObjectValue().isPresent() && keyValue.getSingletonValue().getObjectValue().get() instanceof String) {
-                    String value = String.valueOf(keyValue.getSingletonValue().getObjectValue().get());
-                    mapping.query(key, value);
+            for(CIFTag tag : messageOptional.get().getValue()) {
+                if(tag.getTagType() == CIFContentType.STRING) {
+                    mapping.query(tag.getName(), String.valueOf(tag.getValue()));
                 }
             }
         }
@@ -86,22 +88,23 @@ public class LanguageMapping {
         }
     }
 
-    public ASACNode toAsac() {
-        ASACNode parent = new ASACNode("Language");
-        ASACNode color = new ASACNode("Colors");
-        ASACNode message = new ASACNode("Messages");
+    public CIFCConfiguration toCif() {
+        CIFCConfiguration parent = new CIFCConfiguration();
 
-        for (String key : this.messages.keySet()) {
-            String value = this.messages.get(key);
-            message.put(key, value);
-        }
-        parent.putNode(message);
+        CIFTagCompound color = new CIFTagCompound();
+        CIFTagCompound message = new CIFTagCompound();
 
-        for (String key : this.colors.keySet()) {
-            TextColor value = this.colors.get(key);
-            color.put(key, value.getId());
+        for(String key : this.messages.keySet()) {
+            message.add(CIFTag.of(key, this.messages.get(key)));
         }
-        parent.putNode(color);
+
+        parent.add(CIFTag.of("Colors", color));
+
+        for(String key : this.colors.keySet()) {
+            color.add(CIFTag.of(key, this.colors.get(key).getId()));
+        }
+
+        parent.add(CIFTag.of("Messages", message));
 
         return parent;
     }
