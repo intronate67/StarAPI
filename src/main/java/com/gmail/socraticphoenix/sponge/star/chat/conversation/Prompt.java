@@ -26,7 +26,9 @@ import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifiers;
+import java.util.concurrent.TimeUnit;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 
 public abstract class Prompt implements Promptcessor {
     public static final Prompt END = new End();
@@ -56,6 +58,57 @@ public abstract class Prompt implements Promptcessor {
             return null;
         }
 
+    }
+
+    public static class Delay extends Prompt {
+        private Prompt next;
+        private long time;
+        private TimeUnit unit;
+        private boolean isTicks;
+
+        public Delay(Prompt next, long time, TimeUnit timeUnit) {
+            this.next = next;
+            this.time = time;
+            this.unit = timeUnit;
+            this.isTicks = false;
+        }
+
+        public Delay(Prompt next, long ticks) {
+            this.next = next;
+            this.time = ticks;
+            this.isTicks = true;
+        }
+
+        @Override
+        public Verifier getVerifier() {
+            return Verifiers.alwaysSuccessful();
+        }
+
+        @Override
+        public Text getMessage() {
+            return Texts.of();
+        }
+
+        @Override
+        public Prompt process(StarArgumentValue value, Conversation conversation) {
+            return this.next;
+        }
+
+        public Prompt getNext() {
+            return next;
+        }
+
+        public long getTime() {
+            return time;
+        }
+
+        public TimeUnit getUnit() {
+            return unit;
+        }
+
+        public boolean isTicks() {
+            return isTicks;
+        }
     }
 
     public static class Message extends Prompt {

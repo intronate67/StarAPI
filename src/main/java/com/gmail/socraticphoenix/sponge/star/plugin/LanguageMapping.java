@@ -24,12 +24,12 @@ package com.gmail.socraticphoenix.sponge.star.plugin;
 
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
 import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValue;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 
 public class LanguageMapping {
@@ -77,12 +77,12 @@ public class LanguageMapping {
         }
     }
 
-    public String query(String name, String def) {
+    public Text query(String name, String def) {
         if (this.messages.containsKey(name)) {
-            return this.messages.get(name);
+            return Texts.legacy('&').fromUnchecked(this.messages.get(name));
         } else {
             this.messages.put(name, def);
-            return def;
+            return this.query(name, def);
         }
     }
 

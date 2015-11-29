@@ -25,6 +25,7 @@ package com.gmail.socraticphoenix.sponge.star.map.lobby;
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
 import com.gmail.socraticphoenix.plasma.file.asac.ASACParser;
 import com.gmail.socraticphoenix.plasma.math.PlasmaRandomUtil;
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.entity.npc.ConfigurableSpeechNonPlayableCharacter;
 import com.gmail.socraticphoenix.sponge.star.entity.npc.NonPlayableCharacter;
@@ -56,7 +57,7 @@ public class Lobby {
         this.listener = new LobbyListener(this);
         this.characterList = new ArrayList<>();
         this.spawn = world.getSpawnLocation();
-        File worldFolder = new File(world.getName());
+        File worldFolder = Star.getWorldFile(world);
         File configFile = new File(worldFolder, "lobby.txt");
         if(configFile.exists()) {
             try {

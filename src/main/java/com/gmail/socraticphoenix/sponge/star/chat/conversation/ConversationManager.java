@@ -23,7 +23,9 @@
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.command.CommandSource;
@@ -31,9 +33,27 @@ import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public class ConversationManager {
     private Map<UUID, Conversation> conversations;
+    private Map<UUID, ConversationDelay> delayedConversations;
 
     public ConversationManager() {
         this.conversations = new HashMap<>();
+        this.delayedConversations = new HashMap<>();
+    }
+
+    public boolean isDelayed(UUID player) {
+        return this.delayedConversations.containsKey(player);
+    }
+
+    public void removeDelay(UUID id) {
+        this.delayedConversations.remove(id);
+    }
+
+    public void putDelay(UUID id, ConversationDelay delay) {
+        this.delayedConversations.put(id, delay);
+    }
+
+    public Optional<ConversationDelay> getDelay(UUID player) {
+        return Optional.ofNullable(this.delayedConversations.get(player));
     }
 
     public Conversation get(UUID player) {

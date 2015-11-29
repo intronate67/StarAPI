@@ -25,6 +25,7 @@ package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 import com.gmail.socraticphoenix.plasma.collection.KeyValue;
 import com.gmail.socraticphoenix.plasma.math.PlasmaMathUtil;
 import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
@@ -33,6 +34,7 @@ import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult.Type;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt.Delay;
 import java.util.UUID;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.command.CommandSource;
@@ -59,23 +61,48 @@ public class Conversation {
         this.format = format;
     }
 
+    public static ConversationTemplate template() {
+        return new ConversationTemplate();
+    }
+
     public StarArguments getArguments() {
         return this.arguments;
     }
 
     public void start() {
-        this.target.sendMessage(this.initialMessages);
+        ConversationManager manager = Star.getConversationManager();
+
+        this.target.sendMessages(this.initialMessages);
         this.handler.started(this);
         this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         while (this.current instanceof Prompt.Message) {
             this.current = this.current.getProcessor().process(StarArgumentValue.of(null), this);
             this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         }
+
+        if (this.current instanceof Prompt.Delay) {
+            Prompt.Delay delay = (Delay) this.current;
+            ConversationDelay conversationDelay = new ConversationDelay(this.id);
+            manager.putDelay(this.id, conversationDelay);
+            if (delay.isTicks()) {
+                conversationDelay.runTaskLater(StarMain.getOperatingInstance(), delay.getTime());
+            } else {
+                conversationDelay.runTaskLater(StarMain.getOperatingInstance(), delay.getTime(), delay.getUnit());
+            }
+            this.current = delay.process(StarArgumentValue.parse(""), this);
+        }
     }
 
-    public void end() {
-        StarMain.getOperatingInstance().getConversationManager().remove(this.id);
-        this.handler.normalEnd(this);
+    public Prompt getCurrent() {
+        return this.current;
+    }
+
+    public UUID getId() {
+        return this.id;
+    }
+
+    public void setCurrent(Prompt current) {
+        this.current = current;
     }
 
     public void targetQuitEnd() {
@@ -84,30 +111,49 @@ public class Conversation {
     }
 
     public void step(String message) {
+        ConversationManager manager = Star.getConversationManager();
+
         message = PlasmaStringUtil.removeTrailingSpaces(message);
-        Verifier verifier = this.current.getVerifier();
-        StarArgumentValue value = StarArgumentValue.parse(message);
-        VerificationResult result = verifier.verify(new StarArgumentKeyValue("value", value));
-        if (result.getType() == Type.SUCCESS) {
-            this.current = this.current.getProcessor().process(value, this);
-            if (this.current == Prompt.END) {
-                this.end();
-                return;
-            } else if (this.current instanceof Prompt.Message) {
-                while (this.current instanceof Prompt.Message) {
-                    this.current = this.current.getProcessor().process(StarArgumentValue.of(null), this);
+
+        if (!manager.isDelayed(this.id)) {
+            Verifier verifier = this.current.getVerifier();
+            StarArgumentValue value = StarArgumentValue.parse(message);
+            VerificationResult result = verifier.verify(new StarArgumentKeyValue("value", value));
+            if (result.getType() == Type.SUCCESS) {
+                this.current = this.current.getProcessor().process(value, this);
+                if (this.current == Prompt.END) {
+                    this.end();
+                    return;
+                } else if (this.current instanceof Prompt.Message) {
+                    while (this.current instanceof Prompt.Message) {
+                        this.current = this.current.getProcessor().process(StarArgumentValue.of(null), this);
+                        this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
+                    }
+                }
+
+                if (this.current instanceof Prompt.Delay) {
+                    Prompt.Delay delay = (Delay) this.current;
+                    ConversationDelay conversationDelay = new ConversationDelay(this.id);
+                    manager.putDelay(this.id, conversationDelay);
+                    if (delay.isTicks()) {
+                        conversationDelay.runTaskLater(StarMain.getOperatingInstance(), delay.getTime());
+                    } else {
+                        conversationDelay.runTaskLater(StarMain.getOperatingInstance(), delay.getTime(), delay.getUnit());
+                    }
+                    this.current = delay.process(StarArgumentValue.parse(""), this);
+                } else {
                     this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
                 }
+            } else if (result.getType() == Type.FAILURE) {
+                this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, result.getMessage())));
+                this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
             }
-            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
-        } else if (result.getType() == Type.FAILURE) {
-            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, result.getMessage())));
-            this.target.sendMessage(this.format.fill(new KeyValue<>(Conversation.PROMPT_KEY, this.current.getMessage())));
         }
     }
 
-    public static ConversationTemplate template() {
-        return new ConversationTemplate();
+    public void end() {
+        StarMain.getOperatingInstance().getConversationManager().remove(this.id);
+        this.handler.normalEnd(this);
     }
 
     public CommandSource getTarget() {

@@ -63,7 +63,6 @@ public abstract class StarPlugin {
             this.initializeLogger();
             this.initializeConfig();
             this.initializeData();
-            this.initializeLanguage();
             this.writeInformationFile();
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -145,6 +144,11 @@ public abstract class StarPlugin {
     }
 
     public LanguageMapping getLanguageMapping() {
+        try {
+            this.initializeLanguage(); //Lazy loading because Sponge TextColors aren't available on construction
+        } catch (IOException | ASACException e) {
+            e.printStackTrace();
+        }
         return this.languageMapping;
     }
 

@@ -23,30 +23,34 @@
 package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
 
 import com.gmail.socraticphoenix.sponge.star.Star;
-import com.gmail.socraticphoenix.sponge.star.StarMain;
+import com.gmail.socraticphoenix.sponge.star.StarUtil;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
-import java.util.Optional;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 
-public class CatalogTypeVerifier implements Verifier {
-    private Class<? extends CatalogType> target;
+public class PlayerVerifier implements Verifier {
+    private boolean online;
 
-    public CatalogTypeVerifier(Class<? extends CatalogType> target) {
-        this.target = target;
+    public PlayerVerifier(boolean mustBeOnline) {
+        this.online = mustBeOnline;
     }
 
     @Override
     public VerificationResult verify(StarArgumentKeyValue argument) {
         if(argument.getValue().getAsString().isPresent()) {
-            Optional type = StarMain.getOperatingInstance().getGame().getRegistry().getType(this.target, argument.getValue().getAsString().get());
-            if(!type.isPresent()) {
-                return VerificationResult.failure(Texts.builder("Unrecognized ".concat(this.target.getSimpleName()).concat(": '").concat(argument.getValue().getAsString().get()).concat("'")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+            String player = argument.getValue().getAsString().get();
+            if(this.online && !Star.getServer().getPlayer(player).isPresent()) {
+                return VerificationResult.failure(Texts.builder("Player '".concat(player).concat("' is not online")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+            } else if (!this.online && !(Star.getServer().getPlayer(player).isPresent() || StarUtil.getOfflinePlayer(player).isPresent())) {
+                return VerificationResult.failure(Texts.builder("Player '".concat(player).concat("' could not be found offline or online")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             }
+
+            return VerificationResult.success();
+        } else {
+            return VerificationResult.success();
         }
-        return VerificationResult.success();
     }
+
 }

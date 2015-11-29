@@ -34,14 +34,20 @@ import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.Conversat
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationListener;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby;
+import com.gmail.socraticphoenix.sponge.star.minigame.util.CooldownManager;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
 import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
 import com.gmail.socraticphoenix.sponge.star.serialization.cif.CIFSerializers;
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.*;
+import org.spongepowered.api.event.world.ConstructWorldEvent;
 import org.spongepowered.api.plugin.Plugin;
 import com.gmail.socraticphoenix.sponge.star.plugin.StarPlugin;
 
@@ -52,19 +58,24 @@ import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.ServiceManager;
 
 @Plugin (id = "starApi", name = "StarAPI", version = "0.1")
-@PluginInformation(authors = {"Socratic_Phoenix"}, description = "StarAPI is a Sponge Plugin framework that aims to make plugin interactions with the player smooth, and enable them to do things such as control NPCs and create minigame Lobbies.")
+@PluginInformation (authors = {"Socratic_Phoenix"}, description = "StarAPI is a Sponge Plugin framework that aims to make plugin interactions with the player smooth, and enable them to do things such as control NPCs and create minigame Lobbies.")
 public class StarMain extends StarPlugin {
     private static StarMain starMain;
 
     @Inject
     private Game game;
-    private List<Lobby> lobbies;
     private ConversationManager conversationManager;
+    private CooldownManager cooldownManager;
+    private boolean initialized;
+
+    public static StarMain getOperatingInstance() {
+        return StarMain.starMain;
+    }
 
     @Override
     public void onConstruction() {
-        this.lobbies = new ArrayList<>();
         this.conversationManager = new ConversationManager();
+        this.cooldownManager = new CooldownManager();
         StarMain.starMain = this;
         ASACSerializers.init();
         CIFSerializers.init();
@@ -76,46 +87,24 @@ public class StarMain extends StarPlugin {
     public void onPreInitialization(GamePreInitializationEvent ev) {
         try {
             ServiceManager manager = this.game.getServiceManager();
-            manager.setProvider(this, ConversationManager.class, this.getConversationManager());
+            manager.setProvider(this, ConversationManager.class, this.conversationManager);
+            manager.setProvider(this, CooldownManager.class, this.cooldownManager);
         } catch (ProviderExistsException e) {
             e.printStackTrace();
         }
+        this.initialized = true;
     }
 
     @Override
     @Listener
     public void onInitialization(GameInitializationEvent ev) {
-
-    }
-
-    @Listener
-    public void onServerStartingEvent(GameStartedServerEvent ev) {
-        this.game.getEventManager().registerListeners(this, new ConversationListener());
-        new ConversationEndCommand().registerAsSpongeCommand("end");
-        new ConversationStartCommand().registerAsSpongeCommand("conversation");
-
-        Optional<ASACNode> asacNodeOptional = this.getConfig().getNode("Lobbies");
-        if(asacNodeOptional.isPresent()) {
-            ASACNode lobbies = asacNodeOptional.get();
-            if(lobbies.getBoolean("Enabled").isPresent() && lobbies.getBoolean("Enabled").get()) {
-                Optional<ASACList> listOptional = lobbies.getList("LobbyWorlds");
-                if(listOptional.isPresent()) {
-                    ASACList lobbyWorlds = listOptional.get();
-                    for(int i = 0; i < lobbyWorlds.size(); i++) {
-                        Optional<String> stringOptional = lobbyWorlds.getString(i);
-                        if(stringOptional.isPresent() && this.getGame().getServer().getWorld(stringOptional.get()).isPresent()) {
-                            this.lobbies.add(new Lobby(this.getGame().getServer().getWorld(stringOptional.get()).get()));
-                        }
-                    }
-                }
-            }
-        }
+        new ConversationStartCommand().registerAsSpongeCommand("star.conversation.start");
+        new ConversationEndCommand().registerAsSpongeCommand("star.conversation.end");
     }
 
     @Override
     @Listener
     public void onServerStopping(GameStoppingServerEvent ev) {
-        this.lobbies.forEach(com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby:: killNpcs);
     }
 
     @Override
@@ -130,26 +119,23 @@ public class StarMain extends StarPlugin {
         }
     }
 
-    @Override
-    public void putDefaultValues(ASACNode node) {
-        ASACNode lobbies = new ASACNode("Lobbies");
-        lobbies.put("Enabled", false);
-        ASACValue value = new ASACValue("world", null);
-        value.addAnnotation(ASACAnnotation.IN_LIST);
-        ASACKeyValue keyValue = new ASACKeyValue("LobbyWorlds", ASACValueList.buildList(lobbies, value));
-        lobbies.putKeyValue(keyValue);
-        node.putNode(lobbies);
-    }
-
     public ConversationManager getConversationManager() {
+        this.checkAccess();
         return conversationManager;
     }
 
-    public Game getGame() {
-        return this.game;
+    public CooldownManager getCooldownManager() {
+        return cooldownManager;
     }
 
-    public static StarMain getOperatingInstance() {
-        return StarMain.starMain;
+    private void checkAccess() {
+        if (!this.initialized) {
+            throw new StarAccessException("StarAPI cannot be accessed until after GamePreInitializationEvent.");
+        }
+    }
+
+    public Game getGame() {
+        this.checkAccess();
+        return this.game;
     }
 }

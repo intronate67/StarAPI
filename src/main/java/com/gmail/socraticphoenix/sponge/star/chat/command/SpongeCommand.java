@@ -73,7 +73,7 @@ public class SpongeCommand implements CommandCallable {
                 this.handler.displayHelpTo(source);
             }
         } else {
-            source.sendMessage(Texts.builder(mapping.query("perm-message", "You don't have permission to do that!")).color(mapping.query("error-message-color", TextColors.RED)).build());
+            source.sendMessage(mapping.query("perm-message", "You don't have permission to do that!").builder().color(mapping.query("error-message-color", TextColors.RED)).build());
         }
         return CommandResult.empty();
     }

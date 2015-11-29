@@ -141,7 +141,7 @@ public abstract class CommandHandler {
 
     public boolean hasPermissions(CommandSource source) {
         for (String perm : this.getPermissions()) {
-            if(source.hasPermission(perm)) {
+            if(source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm).asBoolean()) {
                 return true;
             }
         }

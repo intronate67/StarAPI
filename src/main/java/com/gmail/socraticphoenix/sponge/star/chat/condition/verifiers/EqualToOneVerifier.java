@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
@@ -95,7 +96,7 @@ public class EqualToOneVerifier implements Verifier {
 
     @Override
     public VerificationResult verify(StarArgumentKeyValue argument) {
-        return this.equalToElement(argument.getValue().getValue().orElse(null)) ? VerificationResult.success() : VerificationResult.failure(Texts.builder("Value '".concat(StarArgumentValue.write(argument.getValue().getValue().orElse(null))).concat("' did not match one of the following: ").concat(this.toString(this.possibleElements))).color(TextColors.RED).build());
+        return this.equalToElement(argument.getValue().getValue().orElse(null)) ? VerificationResult.success() : VerificationResult.failure(Texts.builder("Value '".concat(StarArgumentValue.write(argument.getValue().getValue().orElse(null))).concat("' did not match one of the following: ").concat(this.toString(this.possibleElements))).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
     }
 
     private boolean equalToElement(Object object) {

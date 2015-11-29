@@ -20,28 +20,33 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
+package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
-import com.gmail.socraticphoenix.sponge.star.Star;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts.AcceptAndRecordPromptcessor;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts.IntegerToDoublePromptcessor;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts.NumberPrompt;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.prompts.ValuePrompt;
 
-public class TypeVerifier implements Verifier {
-    private Class<?> requiredType;
+public class Prompts {
 
-    public TypeVerifier(Class<?> requiredType) {
-        this.requiredType = requiredType;
+    public static Prompt numberPrompt(Promptcessor promptcessor) {
+        return new NumberPrompt(promptcessor);
     }
 
-    @Override
-    public VerificationResult verify(StarArgumentKeyValue argument) {
-        if(!argument.getValue().getValue().isPresent() || this.requiredType.isInstance(argument.getValue().getValue().get())) {
-            return VerificationResult.success();
+    public static Prompt valuePrompt(Promptcessor promptcessor, Class<?> targetValue) {
+        return new ValuePrompt(promptcessor, targetValue);
+    }
+
+    public static Promptcessor recordPromptcessor(String key, Prompt next) {
+        return Prompts.recordPromptcessor(key, next, false);
+    }
+
+    public static Promptcessor recordPromptcessor(String key, Prompt next, boolean convertInts) {
+        if(convertInts) {
+            return new IntegerToDoublePromptcessor(key, next);
         } else {
-            return VerificationResult.failure(Texts.builder("Unrecognized type for argument '".concat(argument.getKey()).concat("' required type is '").concat(this.requiredType.getSimpleName()).concat("'")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+            return new AcceptAndRecordPromptcessor(key, next);
         }
     }
+
 }

@@ -28,8 +28,18 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.block.*;
-import org.spongepowered.api.event.entity.*;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.CollideBlockEvent;
+import org.spongepowered.api.event.block.GrowBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.block.MoveBlockEvent;
+import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.world.weather.Weathers;
@@ -41,6 +51,16 @@ public class LobbyListener {
     public LobbyListener(Lobby lobby) {
         this.lobby = lobby;
         this.game = StarMain.getOperatingInstance().getGame();
+    }
+
+    @Listener
+    public void onDamage(DamageEntityEvent event) {
+        if(this.lobby.is(event.getTargetEntity().getWorld())) {
+            event.setCancelled(true);
+            if (event.getCause().any(DamageSource.class) && event.getCause().first(DamageSource.class).get() == DamageSources.VOID && event.getTargetEntity() instanceof Player) {
+                event.getTargetEntity().setLocation(this.lobby.getSpawn());
+            }
+        }
     }
 
     @Listener

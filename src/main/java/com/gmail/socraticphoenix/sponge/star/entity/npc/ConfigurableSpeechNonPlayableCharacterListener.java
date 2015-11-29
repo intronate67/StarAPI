@@ -25,6 +25,7 @@ package com.gmail.socraticphoenix.sponge.star.entity.npc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 
 public class ConfigurableSpeechNonPlayableCharacterListener {

@@ -20,43 +20,17 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.arguments.parse;
+package com.gmail.socraticphoenix.sponge.star.minigame.property;
 
-import com.gmail.socraticphoenix.plasma.collection.PlasmaListUtil;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedTransferQueue;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 
-public class StarKeyConsumer {
-    private Queue<String> stringQueue;
+public class MinigameProperties {
 
-    public StarKeyConsumer(List<String> keys) {
-        this.stringQueue = new LinkedTransferQueue<>();
-        this.stringQueue.addAll(keys);
-    }
-
-    public String[] all() {
-        return this.stringQueue.toArray(new String[this.stringQueue.size()]);
-    }
-
-    public StarKeyConsumer(String... keys){
-        this(PlasmaListUtil.buildList(keys));
-    }
-
-    public int size() {
-        return this.stringQueue.size();
-    }
-
-    public String consume() {
-        return this.stringQueue.poll();
-    }
-
-    public String peek() {
-        return this.stringQueue.peek();
-    }
-
-    public boolean hasNext() {
-        return !this.stringQueue.isEmpty();
-    }
+    public static final MinigameProperty<Boolean> FALL_DAMAGE = new MinigameProperty<>("property.damage.fall", false);
+    public static final MinigameProperty<GameMode> DEFAULT_GAMEMODE = new MinigameProperty<>("property.gamemode", GameModes.SURVIVAL);
+    public static final MinigameProperty<Boolean> INVENTORY_EDITING = new MinigameProperty<>("property.inventory.editing", false);
+    public static final MinigameProperty<Boolean> ALLOW_EATING = new MinigameProperty<>("propety.hunger.allowfood", false);
+    public static final MinigameProperty<Boolean> AUTO_HUNGER = new MinigameProperty<>("property.hunger.autofood", true);
 
 }

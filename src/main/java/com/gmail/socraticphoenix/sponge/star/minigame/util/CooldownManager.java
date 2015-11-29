@@ -20,28 +20,28 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
+package com.gmail.socraticphoenix.sponge.star.minigame.util;
 
-import com.gmail.socraticphoenix.sponge.star.Star;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
-public class TypeVerifier implements Verifier {
-    private Class<?> requiredType;
+public class CooldownManager {
+    private Map<UUID, Cooldown> cooldownMap;
 
-    public TypeVerifier(Class<?> requiredType) {
-        this.requiredType = requiredType;
+    public CooldownManager() {
+        this.cooldownMap = new HashMap<>();
     }
 
-    @Override
-    public VerificationResult verify(StarArgumentKeyValue argument) {
-        if(!argument.getValue().getValue().isPresent() || this.requiredType.isInstance(argument.getValue().getValue().get())) {
-            return VerificationResult.success();
-        } else {
-            return VerificationResult.failure(Texts.builder("Unrecognized type for argument '".concat(argument.getKey()).concat("' required type is '").concat(this.requiredType.getSimpleName()).concat("'")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-        }
+    public Cooldown newCooldown() {
+        Cooldown cooldown = new Cooldown(UUID.randomUUID());
+        this.cooldownMap.put(cooldown.getUniqueId(), cooldown);
+        return cooldown;
     }
+
+    public Optional<Cooldown> getById(UUID uuid) {
+        return this.cooldownMap.containsKey(uuid) ? Optional.of(this.cooldownMap.get(uuid)) : Optional.empty();
+    }
+
 }

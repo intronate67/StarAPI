@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
@@ -54,7 +55,7 @@ public class MinMaxVerifier implements Verifier {
             if(value >= min && value <= max) {
                 return VerificationResult.success();
             } else {
-                return VerificationResult.failure(Texts.builder("Argument '".concat(argument.getKey()).concat("' was not between ").concat(String.valueOf(this.min)).concat(" and ").concat(String.valueOf(this.max))).color(TextColors.RED).build());
+                return VerificationResult.failure(Texts.builder("Argument '".concat(argument.getKey()).concat("' was not between ").concat(String.valueOf(this.min)).concat(" and ").concat(String.valueOf(this.max))).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             }
 
         }

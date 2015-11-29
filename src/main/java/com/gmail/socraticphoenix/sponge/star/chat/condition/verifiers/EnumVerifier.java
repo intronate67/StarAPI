@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
@@ -38,7 +39,7 @@ public class EnumVerifier implements Verifier {
     @Override
     public VerificationResult verify(StarArgumentKeyValue argument) {
         if(argument.getValue().getAsString().isPresent() && !this.contains(argument.getValue().getAsString().get())) {
-                return VerificationResult.failure(Texts.builder("Unrecognized constant '".concat(argument.getValue().getAsString().get()).concat("' of type ").concat(this.target.getSimpleName())).color(TextColors.RED).build());
+                return VerificationResult.failure(Texts.builder("Unrecognized constant '".concat(argument.getValue().getAsString().get()).concat("' of type ").concat(this.target.getSimpleName())).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
         }
 
         return VerificationResult.success();

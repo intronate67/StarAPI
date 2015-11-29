@@ -36,20 +36,46 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.service.persistence.SerializationService;
+import org.spongepowered.api.service.persistence.SerializationManager;
+import org.spongepowered.api.service.profile.GameProfileResolver;
+import org.spongepowered.api.service.user.UserStorage;
 
 public class StarUtil {
+
+    public static Optional<User> getOfflinePlayer(UUID id) {
+        GameProfileResolver resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileResolver.class);
+        UserStorage storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorage.class);
+        try {
+            return storage.get(resolver.get(id).get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<User> getOfflinePlayer(String name) {
+        GameProfileResolver resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileResolver.class);
+        UserStorage storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorage.class);
+        try {
+            return storage.get(resolver.get(name).get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
 
     public static void applyInventory(Inventory target, CIFArray inventory) throws IOException {
         for (CIFValue value : inventory) {
@@ -124,7 +150,7 @@ public class StarUtil {
 
     public static <T extends DataSerializable> Optional<T> deSerializeJson(String json, Class<T> type) throws IOException {
         DataView target = ConfigurateTranslator.instance().translateFrom(GsonConfigurationLoader.builder().setSource(() -> new BufferedReader(new StringReader(json))).build().load());
-        SerializationService service = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(SerializationService.class);
+        SerializationManager service = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(SerializationManager.class);
         return service.deserialize(type, target);
     }
 

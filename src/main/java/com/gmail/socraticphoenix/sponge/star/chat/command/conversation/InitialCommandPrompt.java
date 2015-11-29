@@ -31,69 +31,103 @@ import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifiers;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.Optional;
+import java.util.*;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 
 public class InitialCommandPrompt extends Prompt {
     private CommandHandler handler;
+    private boolean hasSingleLength;
+    private Deque<Prompt> prompts;
 
     public InitialCommandPrompt(CommandHandler handler) {
         this.handler = handler;
+        this.hasSingleLength = this.handler.getLengths().length == 1;
+        if (this.hasSingleLength) {
+            this.prompts = this.assemblePrompts(this.handler.getLengths()[0]);
+        }
+    }
+
+    private Deque<Prompt> assemblePrompts(int len) {
+        Optional<StarKeyConsumer> consumerOptional = this.handler.getDefaultsForLength(len);
+        if (!consumerOptional.isPresent()) {
+            // should be impossible due to verifiers
+            return new ArrayDeque<>();
+        }
+
+        StarKeyConsumer consumer = consumerOptional.get();
+        ConditionSet conditions = this.handler.getConditions();
+        Deque<Prompt> prompts = new ArrayDeque<>();
+
+        while (consumer.hasNext()) {
+            String key = consumer.consume();
+            Optional<Condition> conditionOptional = conditions.get(key);
+            Verifier verifier;
+            if (conditionOptional.isPresent()) {
+                verifier = conditionOptional.get().getVerifier();
+            } else {
+                verifier = Verifiers.alwaysSuccessful(); //No conditions means any value is fine!
+            }
+
+            Prompt prompt = new CommandPrompt(prompts, key, verifier);
+            prompts.add(prompt);
+        }
+
+        return prompts;
     }
 
     @Override
     public Verifier getVerifier() {
-        return Verifiers.equalTo(this.handler.getLengths());
+        if (!this.hasSingleLength) {
+            return Verifiers.equalTo(this.handler.getLengths());
+        } else {
+            Prompt prompt = this.prompts.peek();
+            if (prompt != null) {
+                return prompt.getVerifier();
+            } else {
+                return Verifiers.alwaysSuccessful(); //Shouldn't really occur...
+            }
+        }
     }
 
     @Override
     public Text getMessage() {
-        return Texts.builder("Please enter the amount of the arguments you are going to enter. Acceptable amounts are: ".concat(Arrays.toString(this.handler.getLengths()))).color(TextColors.GREEN).build();
+        if (!this.hasSingleLength) {
+            return Texts.builder("Please enter the amount of the arguments you are going to enter. Acceptable amounts are: ".concat(Arrays.toString(this.handler.getLengths()))).color(TextColors.GREEN).build();
+        } else {
+            Prompt prompt = this.prompts.peek();
+            if (prompt != null) {
+                return prompt.getMessage();
+            } else {
+                return Texts.builder("Executing command...").color(TextColors.GOLD).build();
+            }
+        }
     }
 
     @Override
     public Prompt process(StarArgumentValue value, Conversation conversation) {
-        if(value.getAsInteger().isPresent()) {
-            int len = value.getAsInteger().get();
-            Optional<StarKeyConsumer> consumerOptional = this.handler.getDefaultsForLength(len);
-            if(!consumerOptional.isPresent()) {
+        if (!this.hasSingleLength) {
+            if (value.getAsInteger().isPresent()) {
+                int len = value.getAsInteger().get();
+                Deque<Prompt> deque = this.assemblePrompts(len);
+                if (!deque.isEmpty()) {
+                    return deque.poll();
+                } else {
+                    //Only occurs if length is 0
+                    return Prompt.END;
+                }
+            } else {
                 // should be impossible due to verifiers
                 return Prompt.END;
             }
-
-            StarKeyConsumer consumer = consumerOptional.get();
-            ConditionSet conditions = this.handler.getConditions();
-            Deque<Prompt> prompts = new ArrayDeque<>();
-
-            while (consumer.hasNext()) {
-                String key = consumer.consume();
-                Optional<Condition> conditionOptional = conditions.get(key);
-                Verifier verifier;
-                if(conditionOptional.isPresent()) {
-                    verifier = conditionOptional.get().getVerifier();
-                } else {
-                    verifier = Verifiers.alwaysSuccessful();
-                }
-
-                Prompt prompt = new CommandPrompt(prompts, key, verifier);
-                prompts.add(prompt);
-            }
-
-            if(prompts.isEmpty()) {
-                //Only occurs if length is 0
-                return Prompt.END;
-            } else {
-                return prompts.poll();
-            }
-
         } else {
-            // should be impossible due to verifiers
-            return Prompt.END;
+            if (!this.prompts.isEmpty()) {
+                Prompt next = this.prompts.poll();
+                return next.process(value, conversation);
+            } else {
+                return Prompt.END;
+            }
         }
     }
 

@@ -20,43 +20,14 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.arguments.parse;
+package com.gmail.socraticphoenix.sponge.star;
 
-import com.gmail.socraticphoenix.plasma.collection.PlasmaListUtil;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedTransferQueue;
+import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 
-public class StarKeyConsumer {
-    private Queue<String> stringQueue;
+public class StarAccessException extends RuntimeException {
 
-    public StarKeyConsumer(List<String> keys) {
-        this.stringQueue = new LinkedTransferQueue<>();
-        this.stringQueue.addAll(keys);
-    }
-
-    public String[] all() {
-        return this.stringQueue.toArray(new String[this.stringQueue.size()]);
-    }
-
-    public StarKeyConsumer(String... keys){
-        this(PlasmaListUtil.buildList(keys));
-    }
-
-    public int size() {
-        return this.stringQueue.size();
-    }
-
-    public String consume() {
-        return this.stringQueue.poll();
-    }
-
-    public String peek() {
-        return this.stringQueue.peek();
-    }
-
-    public boolean hasNext() {
-        return !this.stringQueue.isEmpty();
+    public StarAccessException(String... message) {
+        super(PlasmaStringUtil.join(message));
     }
 
 }

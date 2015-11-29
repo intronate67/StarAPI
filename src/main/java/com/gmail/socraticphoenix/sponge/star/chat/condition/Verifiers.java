@@ -41,6 +41,14 @@ public class Verifiers {
         return Verifiers.successful;
     }
 
+    public static Verifier onlinePlayer() {
+        return new PlayerVerifier(true);
+    }
+
+    public static Verifier offlinePlayer() {
+        return new PlayerVerifier(false);
+    }
+
     public static Verifier equalTo(Object... possibleValues) {
         return new EqualToOneVerifier(possibleValues);
     }

@@ -20,28 +20,17 @@
  *
  * @author Socratic_Phoenix (socraticphoenix@gmail.com)
  */
-package com.gmail.socraticphoenix.sponge.star.chat.condition.verifiers;
+package com.gmail.socraticphoenix.sponge.star.scheduler;
 
-import com.gmail.socraticphoenix.sponge.star.Star;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.format.TextColors;
+public class SpongeRunnableRunnable extends SpongeRunnable {
+    private Runnable runnable;
 
-public class TypeVerifier implements Verifier {
-    private Class<?> requiredType;
-
-    public TypeVerifier(Class<?> requiredType) {
-        this.requiredType = requiredType;
+    public SpongeRunnableRunnable(Runnable runnable) {
+        this.runnable = runnable;
     }
 
     @Override
-    public VerificationResult verify(StarArgumentKeyValue argument) {
-        if(!argument.getValue().getValue().isPresent() || this.requiredType.isInstance(argument.getValue().getValue().get())) {
-            return VerificationResult.success();
-        } else {
-            return VerificationResult.failure(Texts.builder("Unrecognized type for argument '".concat(argument.getKey()).concat("' required type is '").concat(this.requiredType.getSimpleName()).concat("'")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-        }
+    public void run() {
+        this.runnable.run();
     }
 }
