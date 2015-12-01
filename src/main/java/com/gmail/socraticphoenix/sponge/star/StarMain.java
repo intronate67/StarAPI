@@ -22,16 +22,21 @@
  */
 package com.gmail.socraticphoenix.sponge.star;
 
+import com.gmail.socraticphoenix.plasma.file.FileChannelThread;
 import com.gmail.socraticphoenix.plasma.file.cif.io.CIFException;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCException;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationStartCommand;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationEndCommand;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import com.gmail.socraticphoenix.sponge.star.minigame.util.CooldownManager;
+import com.gmail.socraticphoenix.sponge.star.plugin.InformationConstants;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
 import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
 import com.gmail.socraticphoenix.sponge.star.serialization.cif.CIFSerializers;
 import com.google.inject.Inject;
+
+import java.io.File;
 import java.io.IOException;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Listener;
@@ -71,6 +76,33 @@ public class StarMain extends StarPlugin {
         ASACSerializers.init();
         CIFSerializers.init();
         StarArgumentValueConverter.init();
+        File infoDir = new File(this.getConfigDir(), "Additional Information");
+        infoDir.mkdirs();
+        File cifSpec = new File(infoDir, "CIF Specification.txt");
+        File jlscSpec = new File(infoDir, "JLSC Specification.txt");
+        File argsSpec = new File(infoDir, "StarArguments Specification.txt");
+        try {
+            if(!cifSpec.exists()) {
+                FileChannelThread thread = new FileChannelThread(cifSpec);
+                thread.start();
+                thread.write(InformationConstants.CIF_SPEC);
+                thread.close();
+            }
+            if(!jlscSpec.exists()) {
+                FileChannelThread thread = new FileChannelThread(jlscSpec);
+                thread.start();
+                thread.write(InformationConstants.JLSC_SPEC);
+                thread.close();
+            }
+            if(!argsSpec.exists()) {
+                FileChannelThread thread = new FileChannelThread(argsSpec);
+                thread.start();
+                thread.write(InformationConstants.ARGUMENTS_SPEC);
+                thread.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -106,7 +138,7 @@ public class StarMain extends StarPlugin {
             this.saveConfig();
             this.saveData();
             this.saveLanguageMapping();
-        } catch (IOException | CIFException e) {
+        } catch (IOException | JLSCException e) {
             e.printStackTrace();
         }
     }

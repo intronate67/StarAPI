@@ -9,7 +9,7 @@ apply plugin: 'idea'
 //End Plugins
 
 //Program Specific Variables (Fill thses in)
-def programVersion = "0.0.0"
+def programVersion = "0.0.1"
 def programGroup = "com.gmail.socraticphoenix.sponge"
 def programName = "StarAPI"
 def repoName = "Main"
@@ -39,19 +39,14 @@ repositories {
         url 'http://repo.spongepowered.org/maven'
     }
     maven {
-        name 'Forge maven repo'
-        url 'http://files.minecraftforge.net/maven/'
-    }
-    maven {
         name 'My Repo'
         url 'https://dl.bintray.com/meguy26/Main'
     }
 }
 
 dependencies {
-    compile "org.spongepowered:spongeforge:1.8-1577-2.1-DEV-851"
     compile "org.spongepowered:spongeapi:2.1-SNAPSHOT"
-    shadow "com.gmail.socraticphoenix:PlasmaAPI:0.0.0"
+    shadow "com.gmail.socraticphoenix:PlasmaAPI:0.0.1"
 }
 //End Repositories and Dependencies
 

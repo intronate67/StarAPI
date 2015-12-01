@@ -32,6 +32,10 @@ import com.gmail.socraticphoenix.plasma.file.cif.cifc.io.CIFCReader;
 import com.gmail.socraticphoenix.plasma.file.cif.cifc.io.CIFCWriter;
 import com.gmail.socraticphoenix.plasma.file.cif.io.CIFException;
 import com.gmail.socraticphoenix.plasma.file.cif.util.CIFUtil;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCCompound;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCException;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSConfiguration;
+import com.gmail.socraticphoenix.plasma.file.jlsc.io.JLSCReader;
 import com.gmail.socraticphoenix.sponge.star.StarLang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +50,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 public abstract class StarPlugin {
-    private CIFCConfiguration config;
+    private JLSConfiguration config;
     private CIFTagCompound data;
     private LanguageMapping languageMapping;
 
@@ -118,7 +122,7 @@ public abstract class StarPlugin {
         return this.version;
     }
 
-    public CIFCConfiguration getConfig() {
+    public JLSConfiguration getConfig() {
         return this.config;
     }
 
@@ -130,16 +134,16 @@ public abstract class StarPlugin {
         return this.logger;
     }
 
-    public void saveLanguageMapping() throws IOException, CIFException {
-        CIFCWriter.writeToFile(new File(this.configDir, StarLang.LANGUAGE_NAME.toString()), this.languageMapping.toCif());
+    public void saveLanguageMapping() throws IOException, JLSCException {
+        new JLSConfiguration(this.languageMapping.toJLSC(), new File(this.configDir, StarLang.LANGUAGE_NAME.toString())).writeToTarget();
     }
 
-    public void saveConfig() throws IOException, CIFException {
-        CIFCWriter.writeToFile(new File(this.configDir, StarLang.CONFIG_NAME.toString()), this.config);
+    public void saveConfig() throws IOException, JLSCException {
+        this.config.writeToTarget();
     }
 
-    public void reloadConfig() throws IOException, CIFException {
-        this.initializeConfig();
+    public void reloadConfig() throws IOException, JLSCException {
+        this.config.loadFromTarget();
     }
 
     public CIFTagCompound getData() {
@@ -149,7 +153,7 @@ public abstract class StarPlugin {
     public LanguageMapping getLanguageMapping() {
         try {
             this.initializeLanguage(); //Lazy loading because Sponge TextColors aren't available on construction
-        } catch (IOException | CIFException e) {
+        } catch (IOException | JLSCException e) {
             e.printStackTrace();
         }
         return this.languageMapping;
@@ -163,7 +167,7 @@ public abstract class StarPlugin {
         this.logger = LoggerFactory.getLogger(this.id);
     }
 
-    protected void putDefaultConfigValues(CIFCConfiguration node) {
+    protected void putDefaultConfigValues(JLSConfiguration node) {
 
     }
 
@@ -183,17 +187,17 @@ public abstract class StarPlugin {
             thread.write("Id= ".concat(this.id), ls);
             thread.write("Authors= ".concat(this.getHumanReadableAuthorString()), ls, ls);
             thread.write("Description:", ls, this.description, ls, ls);
-            thread.write("Config:", ls, "The config file uses the ASAC format, or At-Symbol-Annotated-Configuration. The config file is human readable, and generally easy to set values in.", ls, ls);
+            thread.write("Config:", ls, "The config file uses the JLSC format, or JSON-Like Structurec Configuration. The config file is human readable, and generally easy to set values in.", ls, ls);
             thread.write("Data:", ls, "The data file uses the CIF format, or Compressed Information Format. It is not human readable, and is intended to store internal information only.");
 
             thread.close();
         }
     }
 
-    private void initializeLanguage() throws IOException, CIFException {
+    private void initializeLanguage() throws IOException, JLSCException {
         File language = new File(this.configDir, StarLang.LANGUAGE_NAME.toString());
         if(language.exists()) {
-            this.languageMapping = LanguageMapping.fromCif(CIFCReader.readFromFile(language).getRoot());
+            this.languageMapping = LanguageMapping.fromJLSC(JLSCReader.readFromFile(language));
         } else {
             this.languageMapping = new LanguageMapping();
         }
@@ -212,16 +216,16 @@ public abstract class StarPlugin {
         CIFUtil.writeToFile(data, this.data, true);
     }
 
-    private void initializeConfig() throws IOException, CIFException {
+    private void initializeConfig() throws IOException, JLSCException {
         File modDir = new File(StarLang.CONFIG_DIR.toString());
         File localDir = new File(modDir, this.name);
         this.configDir = localDir;
         this.configDir.mkdirs();
         File config = new File(localDir, StarLang.CONFIG_NAME.toString());
         if(config.exists()) {
-            this.config = CIFCReader.readFromFile(config);
+            this.config = JLSConfiguration.fromFile(config);
         } else {
-            this.config = new CIFCConfiguration();
+            this.config = new JLSConfiguration(new JLSCCompound(), config);
             this.putDefaultConfigValues(this.config);
         }
         this.saveConfig();

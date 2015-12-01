@@ -28,6 +28,9 @@ import com.gmail.socraticphoenix.plasma.file.cif.CIFTagCompound;
 import com.gmail.socraticphoenix.plasma.file.cif.cifc.CIFCConfiguration;
 import com.gmail.socraticphoenix.plasma.file.cif.tags.CIFContentType;
 import com.gmail.socraticphoenix.plasma.file.cif.tags.CIFTag;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCCompound;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSConfiguration;
+import com.gmail.socraticphoenix.plasma.file.jlsc.value.JLSCPair;
 import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import java.util.LinkedHashMap;
@@ -46,29 +49,36 @@ public class LanguageMapping {
         this.messages = new LinkedHashMap<>();
     }
 
-    public static LanguageMapping fromCif(CIFTagCompound compound) {
+    public JLSCCompound toJLSC() {
+        JLSCCompound root = new JLSCCompound();
+
+        JLSCCompound color = new JLSCCompound();
+        JLSCCompound message = new JLSCCompound();
+
+        this.messages.keySet().stream().forEach(key -> message.put(key, this.messages.get(key)));
+        this.colors.keySet().stream().forEach(key -> message.put(key, this.colors.get(key).getId()));
+
+        root.put("Colors", color);
+        root.put("Messages", message);
+
+        return root;
+    }
+
+    public static LanguageMapping fromJLSC(JLSConfiguration compound) {
         LanguageMapping mapping = new LanguageMapping();
-        Optional<CIFTag<CIFTagCompound>> colorOptional = compound.getCompound("Colors");
-        Optional<CIFTag<CIFTagCompound>> messageOptional = compound.getCompound("Messages");
-        if(colorOptional.isPresent()) {
-            for(CIFTag tag : colorOptional.get().getValue()) {
-                if(tag.getTagType() == CIFContentType.STRING && Star.getGameRegistry().getType(TextColor.class, String.valueOf(tag.getValue())).isPresent()) {
-                    TextColor value = Star.getGameRegistry().getType(TextColor.class, String.valueOf(tag.getValue())).get();
-                    mapping.query(tag.getName(), value);
-                }
-            }
+        Optional<JLSCPair> colorOptional = compound.get("Colors");
+        Optional<JLSCPair> messageOptional = compound.get("Messages");
+        if(colorOptional.isPresent() && colorOptional.get().getAsCompound().isPresent()) {
+            Optional<JLSCCompound> compoundOptional = colorOptional.get().getAsCompound();
+            compoundOptional.get().stream().forEach(pair -> mapping.query(pair.getKey(), Star.getGameRegistry().getType(TextColor.class, String.valueOf(pair.getRawValue().orElse("NONE"))).get()));
         }
-
-        if(messageOptional.isPresent()) {
-            for(CIFTag tag : messageOptional.get().getValue()) {
-                if(tag.getTagType() == CIFContentType.STRING) {
-                    mapping.query(tag.getName(), String.valueOf(tag.getValue()));
-                }
-            }
+        if(messageOptional.isPresent() && messageOptional.get().getAsCompound().isPresent()) {
+            Optional<JLSCCompound> compoundOptional = messageOptional.get().getAsCompound();
+            compoundOptional.get().stream().forEach(pair -> mapping.query(pair.getKey(), String.valueOf(pair.getRawValue().orElse("NULL"))));
         }
-
         return mapping;
     }
+
 
     public TextColor query(String name, TextColor def) {
         if (this.colors.containsKey(name)) {
@@ -88,25 +98,6 @@ public class LanguageMapping {
         }
     }
 
-    public CIFCConfiguration toCif() {
-        CIFCConfiguration parent = new CIFCConfiguration();
 
-        CIFTagCompound color = new CIFTagCompound();
-        CIFTagCompound message = new CIFTagCompound();
-
-        for(String key : this.messages.keySet()) {
-            message.add(CIFTag.of(key, this.messages.get(key)));
-        }
-
-        parent.add(CIFTag.of("Colors", color));
-
-        for(String key : this.colors.keySet()) {
-            color.add(CIFTag.of(key, this.colors.get(key).getId()));
-        }
-
-        parent.add(CIFTag.of("Messages", message));
-
-        return parent;
-    }
 
 }

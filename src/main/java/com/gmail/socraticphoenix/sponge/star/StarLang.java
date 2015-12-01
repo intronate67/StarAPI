@@ -25,10 +25,10 @@ package com.gmail.socraticphoenix.sponge.star;
 public enum  StarLang {
     MOD_DIR("mods"),
     CONFIG_DIR("config"),
-    CONFIG_NAME("config.asac"),
+    CONFIG_NAME("config.jlsc"),
     DATA_NAME("data.cif"),
     INFORMATION_NAME("info.txt"),
-    LANGUAGE_NAME("lang.asac")
+    LANGUAGE_NAME("lang.jlsc")
 
     ;
 
