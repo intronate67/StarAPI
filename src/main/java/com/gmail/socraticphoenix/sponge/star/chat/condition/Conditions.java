@@ -25,22 +25,19 @@ package com.gmail.socraticphoenix.sponge.star.chat.condition;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult.Type;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
+
 import java.util.Optional;
 
 public class Conditions {
 
 
     public static VerificationResult runConditions(ConditionSet set, StarArguments arguments) {
-        if(set.size() != arguments.size()) {
-            return VerificationResult.failure("Unequal sizes (internal error)");
-        } else {
-            for(StarArgumentKeyValue keyValue : arguments) {
-                Optional<Condition> conditionOpt = set.get(keyValue.getKey());
-                if(conditionOpt.isPresent()) {
-                    VerificationResult result = conditionOpt.get().verify(keyValue);
-                    if(result.getType() == Type.FAILURE) {
-                        return result;
-                    }
+        for (StarArgumentKeyValue keyValue : arguments) {
+            Optional<Condition> conditionOpt = set.get(keyValue.getKey());
+            if (conditionOpt.isPresent()) {
+                VerificationResult result = conditionOpt.get().verify(keyValue);
+                if (result.getType() == Type.FAILURE) {
+                    return result;
                 }
             }
         }
