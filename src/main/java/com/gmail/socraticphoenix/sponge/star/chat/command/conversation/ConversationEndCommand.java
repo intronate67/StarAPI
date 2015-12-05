@@ -32,10 +32,11 @@ import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
 
 @Command(usage = "no arguments", longHelp = "Ends any conversation you are currently in.", shortDescription = "Ends your conversation.")
 public class ConversationEndCommand extends CommandHandler {

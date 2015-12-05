@@ -46,15 +46,15 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.service.persistence.SerializationManager;
-import org.spongepowered.api.service.profile.GameProfileResolver;
-import org.spongepowered.api.service.user.UserStorage;
+import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.util.persistence.SerializationManager;
 
 public class StarUtil {
 
     public static Optional<User> getOfflinePlayer(UUID id) {
-        GameProfileResolver resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileResolver.class);
-        UserStorage storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorage.class);
+        GameProfileManager resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileManager.class);
+        UserStorageService storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         try {
             return storage.get(resolver.get(id).get());
         } catch (InterruptedException | ExecutionException ignored) {
@@ -64,8 +64,8 @@ public class StarUtil {
     }
 
     public static Optional<User> getOfflinePlayer(String name) {
-        GameProfileResolver resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileResolver.class);
-        UserStorage storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorage.class);
+        GameProfileManager resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileManager.class);
+        UserStorageService storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         try {
             return storage.get(resolver.get(name).get());
         } catch (InterruptedException | ExecutionException e) {

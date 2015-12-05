@@ -22,10 +22,11 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentTokenizer;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandSource;
 
 public class CommandTokenizerHandler implements StarArgumentTokenizer.Handler {
     private CommandSource source;
@@ -36,6 +37,6 @@ public class CommandTokenizerHandler implements StarArgumentTokenizer.Handler {
 
     @Override
     public void handleError(StarArgumentTokenizer tokenizer, String message) {
-        source.sendMessage(Texts.builder("Error while parsing arguments: ".concat(message)).color(TextColors.RED).build());
+        source.sendMessage(Texts.builder("Error while parsing arguments: ".concat(message)).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
     }
 }

@@ -23,24 +23,24 @@
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
 import com.gmail.socraticphoenix.sponge.star.Star;
-import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentParser;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Conditions;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult.Type;
-import com.gmail.socraticphoenix.sponge.star.plugin.LanguageMapping;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
+
 
 public class SpongeCommand implements CommandCallable {
     private CommandHandler handler;

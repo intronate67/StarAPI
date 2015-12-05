@@ -23,13 +23,13 @@
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public class ConversationManager {
     private Map<UUID, Conversation> conversations;

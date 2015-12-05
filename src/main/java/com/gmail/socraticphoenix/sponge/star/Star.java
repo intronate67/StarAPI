@@ -34,11 +34,11 @@ import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.service.command.CommandService;
-import org.spongepowered.api.service.event.EventManager;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 
@@ -93,8 +93,8 @@ public class Star {
         return Star.getGame().getRegistry();
     }
 
-    public static CommandService getCommandService() {
-        return Star.getGame().getCommandDispatcher();
+    public static CommandManager getCommandManager() {
+        return Star.getGame().getCommandManager();
     }
 
     public static EventManager getEventManager() {

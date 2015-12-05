@@ -26,6 +26,8 @@ import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -35,8 +37,6 @@ import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public class ConversationListener {
 

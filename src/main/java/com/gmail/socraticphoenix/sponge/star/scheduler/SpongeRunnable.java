@@ -23,19 +23,18 @@
 package com.gmail.socraticphoenix.sponge.star.scheduler;
 
 import com.gmail.socraticphoenix.sponge.star.StarMain;
-import java.util.HashMap;
-import java.util.Map;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.Task;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.spongepowered.api.service.scheduler.SchedulerService;
-import org.spongepowered.api.service.scheduler.Task;
 
 public abstract class SpongeRunnable implements Runnable {
     public static final UUID NOT_STARTED = UUID.randomUUID();
 
     private UUID id;
-    private SchedulerService service;
+    private Scheduler service;
 
     public SpongeRunnable() {
         this.service = StarMain.getOperatingInstance().getGame().getScheduler();

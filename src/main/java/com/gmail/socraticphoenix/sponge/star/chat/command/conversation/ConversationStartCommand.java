@@ -26,14 +26,16 @@ import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
-import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentKeyValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarKeyConsumer;
 import com.gmail.socraticphoenix.sponge.star.chat.command.Command;
 import com.gmail.socraticphoenix.sponge.star.chat.command.CommandHandler;
 import com.gmail.socraticphoenix.sponge.star.chat.command.MainCommand;
 import com.gmail.socraticphoenix.sponge.star.chat.command.SpongeCommand;
-import com.gmail.socraticphoenix.sponge.star.chat.condition.*;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Condition;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult;
+import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifiers;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResult.Reason;
@@ -41,13 +43,14 @@ import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationTempl
 
 import java.util.Optional;
 
-import org.spongepowered.api.service.command.CommandService;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.CommandMapping;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandMapping;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
+
 
 @Command(usage = "<command>", longHelp = "Starts a command-converted conversation with you for the specified command.", shortDescription = "Starts a command conversation.")
 public class ConversationStartCommand extends CommandHandler {
@@ -55,7 +58,7 @@ public class ConversationStartCommand extends CommandHandler {
     @Override
     public CommandResult execute(CommandSource source, StarArguments arguments, String argString) {
         String command = PlasmaStringUtil.removeTrailingSpaces(arguments.get("command").get().getAsString().get()).split(" ")[0];
-        CommandService service = StarMain.getOperatingInstance().getGame().getCommandDispatcher();
+        CommandManager service = StarMain.getOperatingInstance().getGame().getCommandManager();
         CommandMapping mapping = service.get(command).get();
         if (mapping.getCallable() instanceof SpongeCommand) {
             SpongeCommand spongeCommand = (SpongeCommand) mapping.getCallable();
@@ -156,7 +159,7 @@ public class ConversationStartCommand extends CommandHandler {
                         Verifiers.type(String.class),
                         argument -> {
                             if (argument.getValue().getAsString().isPresent()) {
-                                CommandService service = StarMain.getOperatingInstance().getGame().getCommandDispatcher();
+                                CommandManager service = StarMain.getOperatingInstance().getGame().getCommandManager();
                                 String command = PlasmaStringUtil.removeTrailingSpaces(argument.getValue().getAsString().get()).split(" ")[0];
                                 if (service.get(command).isPresent()) {
                                     if (service.get(command).get().getCallable() instanceof SpongeCommand || service.get(command).get().getCallable() instanceof MainCommand) {

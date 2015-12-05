@@ -28,8 +28,9 @@ import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResul
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.command.CommandSource;
 
 public class ConversationTemplate {
     private Prompt prompt;

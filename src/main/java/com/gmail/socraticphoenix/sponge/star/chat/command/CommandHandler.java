@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command;
 
+import com.gmail.socraticphoenix.plasma.source.util.SourceNamespace;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.chat.ChatFormat;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
@@ -32,19 +33,19 @@ import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.InitialCo
 import com.gmail.socraticphoenix.sponge.star.chat.condition.ConditionSet;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationTemplate;
-import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.CommandBlockSource;
+import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
-import org.spongepowered.api.util.command.source.CommandBlockSource;
-import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public abstract class CommandHandler {
 
@@ -64,14 +65,19 @@ public abstract class CommandHandler {
         return Texts.builder("    - ").append(this.getInfo().getShortDescription()).append(Texts.of(": ")).append(this.getInfo().getUsage()).append(Texts.builder("\n    - ").color(TextColors.WHITE).build()).append(this.getInfo().getLongHelp()).build();
     }
 
+    public boolean modularizedPermissions() {
+        Command command = this.getClass().getAnnotation(Command.class);
+        if (command != null) {
+            return command.modularizePerms();
+        } else {
+            return true;
+        }
+    }
+
     public CommandInfo getInfo() {
         Command command = this.getClass().getAnnotation(Command.class);
         if (command != null) {
-            try {
-                return new CommandInfo(Texts.legacy('&').from(command.shortDescription()), Texts.legacy('&').from(command.longHelp()), Texts.legacy('&').from(command.usage()));
-            } catch (TextMessageException e) {
-                e.printStackTrace();
-            }
+            return new CommandInfo(Texts.legacy('&').fromUnchecked(command.shortDescription()), Texts.legacy('&').fromUnchecked(command.longHelp()), Texts.legacy('&').fromUnchecked(command.usage()));
         }
         return new CommandInfo(Texts.of(), Texts.of(), Texts.of());
     }
@@ -122,36 +128,50 @@ public abstract class CommandHandler {
     }
 
     public boolean testPermission(CommandSource source) {
-        String[] perms = this.getPermissions();
-        if (perms.length <= 0) {
-            return true;
-        } else {
-            for (String perm : perms) {
-                if (source.hasPermission(perm)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        return this.hasPermissions(source);
     }
 
     public abstract String[] getPermissions();
 
     public void registerAsSpongeCommand(String... names) {
-        StarMain.getOperatingInstance().getGame().getCommandDispatcher().register(StarMain.getOperatingInstance(), this.toSponge(), names);
+        StarMain.getOperatingInstance().getGame().getCommandManager().register(StarMain.getOperatingInstance(), this.toSponge(), names);
     }
 
     public boolean hasPermissions(CommandSource source) {
-        if(source instanceof CommandBlockSource || source instanceof ConsoleSource) {
+        if (this.getPermissions().length == 0) {
+            return true;
+        } else if (source instanceof CommandBlockSource || source instanceof ConsoleSource) {
             return true;
         } else {
-            for (String perm : this.getPermissions()) {
-                if (source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm) == Tristate.TRUE) {
-                    return true;
+            if (!this.modularizedPermissions()) {
+                for (String perm : this.getPermissions()) {
+                    if (source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm) == Tristate.TRUE) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                for (String perm : this.getPermissions()) {
+                    SourceNamespace namespace = new SourceNamespace(perm);
+                    if (source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm) == Tristate.TRUE) {
+                        return true;
+                    } else {
+                        StringBuilder builder = new StringBuilder();
+                        String[] parents = namespace.getParentNames();
+                        for (int i = 0; i < parents.length; i++) {
+                            String parent = parents[i];
+                            builder.append(parent);
+                            if (source.hasPermission(builder.toString()) && source.getPermissionValue(source.getActiveContexts(), builder.toString()) == Tristate.TRUE) {
+                                return true;
+                            }
+                            if(i < parents.length - 1) {
+                                builder.append(".");
+                            }
+                        }
+                    }
+                }
+                return false;
             }
-            return this.getPermissions().length == 0;
         }
     }
 

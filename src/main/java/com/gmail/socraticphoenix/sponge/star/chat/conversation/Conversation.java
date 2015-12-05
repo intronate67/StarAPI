@@ -23,7 +23,6 @@
 package com.gmail.socraticphoenix.sponge.star.chat.conversation;
 
 import com.gmail.socraticphoenix.plasma.collection.KeyValue;
-import com.gmail.socraticphoenix.plasma.math.PlasmaMathUtil;
 import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
@@ -36,8 +35,9 @@ import com.gmail.socraticphoenix.sponge.star.chat.condition.VerificationResult.T
 import com.gmail.socraticphoenix.sponge.star.chat.condition.Verifier;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Prompt.Delay;
 import java.util.UUID;
+
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.util.command.CommandSource;
 
 public class Conversation {
     public static final String PROMPT_KEY = "$prompt";

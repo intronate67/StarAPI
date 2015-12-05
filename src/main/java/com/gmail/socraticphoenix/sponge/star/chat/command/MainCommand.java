@@ -33,13 +33,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.gmail.socraticphoenix.sponge.star.Star;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.CommandCallable;
-import org.spongepowered.api.util.command.CommandException;
-import org.spongepowered.api.util.command.CommandResult;
-import org.spongepowered.api.util.command.CommandSource;
 
 public class MainCommand implements CommandCallable {
     private Map<String, CommandCallable> subCommands;

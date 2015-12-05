@@ -34,4 +34,6 @@ public @interface Command {
 
     String shortDescription();
 
+    boolean modularizePerms() default true;
+
 }
