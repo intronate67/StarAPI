@@ -51,6 +51,10 @@ public class StarArgumentValue {
         return this.getAs(Boolean.class);
     }
 
+    public Optional<StarArgumentList> getAsList() {
+        return this.getAs(StarArgumentList.class);
+    }
+
     public Optional<Double> getAsDouble() {
         return this.getAs(Double.class);
     }

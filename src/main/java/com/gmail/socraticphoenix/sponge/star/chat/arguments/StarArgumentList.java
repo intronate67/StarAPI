@@ -23,9 +23,11 @@
 package com.gmail.socraticphoenix.sponge.star.chat.arguments;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
-public class StarArgumentList {
+public class StarArgumentList implements Iterable<StarArgumentValue> {
     List<StarArgumentValue> starArguments = new ArrayList<>();
 
     public StarArgumentValue get(int i) {
@@ -44,6 +46,10 @@ public class StarArgumentList {
         this.starArguments.remove(value);
     }
 
+    public int size()  {
+        return this.starArguments.size();
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -58,4 +64,12 @@ public class StarArgumentList {
         return builder.toString();
     }
 
+    @Override
+    public Iterator<StarArgumentValue> iterator() {
+        return this.starArguments.iterator();
+    }
+
+    public Stream<StarArgumentValue> stream() {
+        return this.starArguments.stream();
+    }
 }

@@ -62,17 +62,21 @@ public class ConversationStartCommand extends CommandHandler {
         CommandMapping mapping = service.get(command).get();
         if (mapping.getCallable() instanceof SpongeCommand) {
             SpongeCommand spongeCommand = (SpongeCommand) mapping.getCallable();
-            ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
-            ConversationResult result = template.startWith(source);
-            if (!result.wasSuccessful()) {
-                ConversationResult.Reason reason = result.getReason();
-                if (Reason.TARGET_IN_CONVERSATION == reason) {
-                    source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
-                    source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+            if (spongeCommand.getHandler().hasPermissions(source)) {
+                ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
+                ConversationResult result = template.startWith(source);
+                if (!result.wasSuccessful()) {
+                    ConversationResult.Reason reason = result.getReason();
+                    if (Reason.TARGET_IN_CONVERSATION == reason) {
+                        source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                    } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
+                        source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                    }
+                } else {
+                    result.getConversation().get().start();
                 }
             } else {
-                result.getConversation().get().start();
+                source.sendMessage(Texts.builder("You do not have permission to execute that command").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             }
         } else if (mapping.getCallable() instanceof MainCommand) {
             MainCommand mainCommand = (MainCommand) mapping.getCallable();
@@ -87,19 +91,22 @@ public class ConversationStartCommand extends CommandHandler {
                 if (pieces.length <= i) {
                     if (current instanceof SpongeCommand) {
                         SpongeCommand spongeCommand = (SpongeCommand) current;
-                        ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
-                        ConversationResult result = template.startWith(source);
-                        if (!result.wasSuccessful()) {
-                            ConversationResult.Reason reason = result.getReason();
-                            if (Reason.TARGET_IN_CONVERSATION == reason) {
-                                source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                            } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
-                                source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                        if (spongeCommand.getHandler().hasPermissions(source)) {
+                            ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
+                            ConversationResult result = template.startWith(source);
+                            if (!result.wasSuccessful()) {
+                                ConversationResult.Reason reason = result.getReason();
+                                if (Reason.TARGET_IN_CONVERSATION == reason) {
+                                    source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                                } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
+                                    source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                                }
+                            } else {
+                                result.getConversation().get().start();
                             }
                         } else {
-                            result.getConversation().get().start();
+                            source.sendMessage(Texts.builder("You do not have permission to execute that command").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
                         }
-
                     } else if (current instanceof MainCommand) {
                         source.sendMessage(Texts.builder("Found main command under '".concat(pieces[i - 1]).concat("' but there were no more sub commands left")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
 
@@ -113,17 +120,21 @@ public class ConversationStartCommand extends CommandHandler {
                                 source.sendMessage(Texts.builder("Found sub command under '".concat(pieces[i - 1]).concat("' but more commands were specified")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
                             } else {
                                 SpongeCommand spongeCommand = (SpongeCommand) current;
-                                ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
-                                ConversationResult result = template.startWith(source);
-                                if (!result.wasSuccessful()) {
-                                    ConversationResult.Reason reason = result.getReason();
-                                    if (Reason.TARGET_IN_CONVERSATION == reason) {
-                                        source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                                    } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
-                                        source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                                if (spongeCommand.getHandler().hasPermissions(source)) {
+                                    ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
+                                    ConversationResult result = template.startWith(source);
+                                    if (!result.wasSuccessful()) {
+                                        ConversationResult.Reason reason = result.getReason();
+                                        if (Reason.TARGET_IN_CONVERSATION == reason) {
+                                            source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                                        } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
+                                            source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                                        }
+                                    } else {
+                                        result.getConversation().get().start();
                                     }
                                 } else {
-                                    result.getConversation().get().start();
+                                    source.sendMessage(Texts.builder("You do not have permission to execute that command").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
                                 }
                             }
                             break;

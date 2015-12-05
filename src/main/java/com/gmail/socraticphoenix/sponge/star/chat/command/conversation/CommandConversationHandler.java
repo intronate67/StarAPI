@@ -22,6 +22,7 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.command.conversation;
 
+import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArguments;
 import com.gmail.socraticphoenix.sponge.star.chat.command.CommandHandler;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
@@ -40,7 +41,11 @@ public class CommandConversationHandler implements Conversation.Handler {
     public void normalEnd(Conversation conversation) {
         StarArguments arguments = conversation.getArguments();
         CommandSource source = conversation.getTarget();
-        this.handler.execute(source, arguments, arguments.toString());
+        if(this.handler.hasPermissions(source)) {
+            this.handler.execute(source, arguments, arguments.toString());
+        } else {
+            source.sendMessage(Texts.builder("You do not have permission to execute that command").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+        }
     }
 
     @Override

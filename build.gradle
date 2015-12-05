@@ -9,7 +9,7 @@ apply plugin: 'idea'
 //End Plugins
 
 //Program Specific Variables (Fill thses in)
-def programVersion = "0.0.9"
+def programVersion = "0.0.10"
 def programGroup = "com.gmail.socraticphoenix.sponge"
 def programName = "StarAPI"
 def repoName = "Main"
