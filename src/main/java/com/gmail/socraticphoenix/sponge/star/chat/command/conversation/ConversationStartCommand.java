@@ -38,7 +38,9 @@ import com.gmail.socraticphoenix.sponge.star.chat.conversation.Conversation;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResult;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationResult.Reason;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationTemplate;
+
 import java.util.Optional;
+
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
@@ -47,12 +49,12 @@ import org.spongepowered.api.util.command.CommandMapping;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
 
-@Command (usage = "<command>", longHelp = "Starts a command-converted conversation with you for the specified command.", shortDescription = "Starts a command conversation.")
+@Command(usage = "<command>", longHelp = "Starts a command-converted conversation with you for the specified command.", shortDescription = "Starts a command conversation.")
 public class ConversationStartCommand extends CommandHandler {
 
     @Override
     public CommandResult execute(CommandSource source, StarArguments arguments, String argString) {
-        String command = arguments.get("command").get().getAsString().get();
+        String command = PlasmaStringUtil.removeTrailingSpaces(arguments.get("command").get().getAsString().get()).split(" ")[0];
         CommandService service = StarMain.getOperatingInstance().getGame().getCommandDispatcher();
         CommandMapping mapping = service.get(command).get();
         if (mapping.getCallable() instanceof SpongeCommand) {
@@ -71,49 +73,74 @@ public class ConversationStartCommand extends CommandHandler {
             }
         } else if (mapping.getCallable() instanceof MainCommand) {
             MainCommand mainCommand = (MainCommand) mapping.getCallable();
-            String[] pieces = PlasmaStringUtil.removeTrailingSpaces(PlasmaStringUtil.minimizeSpaces(argString)).split(" ");
+            String[] pieces = PlasmaStringUtil.removeTrailingSpaces(arguments.get("command").get().getAsString().get()).split(" ");
             if (pieces.length <= 1) {
                 source.sendMessage(Texts.builder("Found Main command under '".concat(pieces[0]).concat("' but no sub-commands in request")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             } else if (!mainCommand.getSubCommand(pieces[1]).isPresent()) {
-                source.sendMessage(Texts.builder("Found Main command under '".concat(pieces[0].concat("' but did not recognize sub-command '").concat(pieces[1]).concat("'"))).color(TextColors.RED).build());
+                source.sendMessage(Texts.builder("Found Main command under '".concat(pieces[0].concat("' but did not recognize sub-command '").concat(pieces[1]).concat("'"))).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
             } else {
                 CommandCallable current = mainCommand.getSubCommand(pieces[1]).get();
-                for (int i = 2; i < pieces.length; i++) {
-                    if(current instanceof SpongeCommand) {
-                        if(i != pieces.length - 1) {
-                            source.sendMessage(Texts.builder("Found sub command under '".concat(pieces[i - 1]).concat("' but more commands were specified")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                        } else {
-                            SpongeCommand spongeCommand = (SpongeCommand) current;
-                            ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
-                            ConversationResult result = template.startWith(source);
-                            if (!result.wasSuccessful()) {
-                                ConversationResult.Reason reason = result.getReason();
-                                if (Reason.TARGET_IN_CONVERSATION == reason) {
-                                    source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                                } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
-                                    source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
-                                }
-                            } else {
-                                result.getConversation().get().start();
+                int i = 2;
+                if (pieces.length <= i) {
+                    if (current instanceof SpongeCommand) {
+                        SpongeCommand spongeCommand = (SpongeCommand) current;
+                        ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
+                        ConversationResult result = template.startWith(source);
+                        if (!result.wasSuccessful()) {
+                            ConversationResult.Reason reason = result.getReason();
+                            if (Reason.TARGET_IN_CONVERSATION == reason) {
+                                source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                            } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
+                                source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
                             }
-                        }
-                        break;
-                    } else if (current instanceof MainCommand) {
-                        if(i == pieces.length - 1) {
-                            source.sendMessage(Texts.builder("Found main command under '".concat(pieces[i - 1]).concat("' but there were no more sub commands left")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                            break;
                         } else {
-                            Optional<CommandCallable> optionalCommand = ((MainCommand) current).getSubCommand(pieces[i - 1]);
-                            if(!optionalCommand.isPresent()) {
-                                source.sendMessage(Texts.builder("Sub-command '".concat(pieces[i - 1]).concat("' could not be found")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                            result.getConversation().get().start();
+                        }
+
+                    } else if (current instanceof MainCommand) {
+                        source.sendMessage(Texts.builder("Found main command under '".concat(pieces[i - 1]).concat("' but there were no more sub commands left")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+
+                    } else {
+                        source.sendMessage(Texts.builder("Command '".concat(pieces[i - 1]).concat("' does not support conversation conversion.")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                    }
+                } else {
+                    for (; i < pieces.length; i++) {
+                        if (current instanceof SpongeCommand) {
+                            if (i != pieces.length - 1) {
+                                source.sendMessage(Texts.builder("Found sub command under '".concat(pieces[i - 1]).concat("' but more commands were specified")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                            } else {
+                                SpongeCommand spongeCommand = (SpongeCommand) current;
+                                ConversationTemplate template = spongeCommand.getHandler().toConversation(ChatFormat.builder().literal(Star.getStarMain().getLanguageMapping().query("command-bot-name", "Indigo").builder().append(Texts.of("> ")).color(Star.getStarMain().getLanguageMapping().query("command-bot-name", TextColors.LIGHT_PURPLE)).build()).literal(Texts.builder().color(Star.getStarMain().getLanguageMapping().query("command-bot-message", TextColors.YELLOW)).build()).variable(Conversation.PROMPT_KEY).build());
+                                ConversationResult result = template.startWith(source);
+                                if (!result.wasSuccessful()) {
+                                    ConversationResult.Reason reason = result.getReason();
+                                    if (Reason.TARGET_IN_CONVERSATION == reason) {
+                                        source.sendMessage(Texts.builder("Cannot start a conversation with you because you are already in a conversation.").color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                                    } else if (Reason.UNKNOWN_COMMAND_SOURCE == reason) {
+                                        source.sendMessage(Texts.of("I don't know what you are... Conversations only work for the console or players"));
+                                    }
+                                } else {
+                                    result.getConversation().get().start();
+                                }
+                            }
+                            break;
+                        } else if (current instanceof MainCommand) {
+                            if (i == pieces.length - 1) {
+                                source.sendMessage(Texts.builder("Found main command under '".concat(pieces[i - 1]).concat("' but there were no more sub commands left")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
                                 break;
                             } else {
-                                current = optionalCommand.get();
+                                Optional<CommandCallable> optionalCommand = ((MainCommand) current).getSubCommand(pieces[i - 1]);
+                                if (!optionalCommand.isPresent()) {
+                                    source.sendMessage(Texts.builder("Sub-command '".concat(pieces[i - 1]).concat("' could not be found")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                                    break;
+                                } else {
+                                    current = optionalCommand.get();
+                                }
                             }
+                        } else {
+                            source.sendMessage(Texts.builder("Command '".concat(pieces[i - 1]).concat("' does not support conversation conversion.")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
+                            break;
                         }
-                    } else {
-                        source.sendMessage(Texts.builder("Command '".concat(pieces[i-1]).concat("' does not support conversation conversion.")).color(Star.getStarMain().getLanguageMapping().query("command-error", TextColors.RED)).build());
-                        break;
                     }
                 }
             }
@@ -130,7 +157,7 @@ public class ConversationStartCommand extends CommandHandler {
                         argument -> {
                             if (argument.getValue().getAsString().isPresent()) {
                                 CommandService service = StarMain.getOperatingInstance().getGame().getCommandDispatcher();
-                                String command = argument.getValue().getAsString().get();
+                                String command = PlasmaStringUtil.removeTrailingSpaces(argument.getValue().getAsString().get()).split(" ")[0];
                                 if (service.get(command).isPresent()) {
                                     if (service.get(command).get().getCallable() instanceof SpongeCommand || service.get(command).get().getCallable() instanceof MainCommand) {
                                         return VerificationResult.success();
@@ -150,7 +177,7 @@ public class ConversationStartCommand extends CommandHandler {
 
     @Override
     public int[] getLengths() {
-        return new int[] {1};
+        return new int[]{1};
     }
 
     @Override
@@ -160,7 +187,7 @@ public class ConversationStartCommand extends CommandHandler {
 
     @Override
     public String[] getPermissions() {
-        return new String[] {};
+        return new String[]{};
     }
 
 }

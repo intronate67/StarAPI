@@ -57,8 +57,8 @@ public class StarUtil {
         UserStorage storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorage.class);
         try {
             return storage.get(resolver.get(id).get());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException ignored) {
+
         }
         return Optional.empty();
     }

@@ -27,6 +27,7 @@ import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCException;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationStartCommand;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationEndCommand;
+import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationListener;
 import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManager;
 import com.gmail.socraticphoenix.sponge.star.minigame.util.CooldownManager;
 import com.gmail.socraticphoenix.sponge.star.plugin.InformationConstants;
@@ -115,9 +116,9 @@ public class StarMain extends StarPlugin {
     @Override
     @Listener
     public void onInitialization(GameInitializationEvent ev) {
-
-        new ConversationStartCommand().registerAsSpongeCommand("star.conversation.start");
-        new ConversationEndCommand().registerAsSpongeCommand("star.conversation.end");
+        Star.getEventManager().registerListeners(this, new ConversationListener());
+        new ConversationStartCommand().registerAsSpongeCommand("conversation");
+        new ConversationEndCommand().registerAsSpongeCommand("end");
     }
 
     @Override

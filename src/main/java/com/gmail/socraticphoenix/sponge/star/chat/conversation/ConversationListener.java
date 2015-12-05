@@ -68,6 +68,8 @@ public class ConversationListener {
                 if(!message.equals("end")) {
                     manager.get(id).step(message);
                     event.setCancelled(true);
+                } else {
+                    manager.get(id).targetQuitEnd();
                 }
             }
         }

@@ -40,8 +40,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.command.CommandResult;
 import org.spongepowered.api.util.command.CommandSource;
+import org.spongepowered.api.util.command.source.CommandBlockSource;
+import org.spongepowered.api.util.command.source.ConsoleSource;
 
 public abstract class CommandHandler {
 
@@ -140,12 +143,16 @@ public abstract class CommandHandler {
     }
 
     public boolean hasPermissions(CommandSource source) {
-        for (String perm : this.getPermissions()) {
-            if(source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm).asBoolean()) {
-                return true;
+        if(source instanceof CommandBlockSource || source instanceof ConsoleSource) {
+            return true;
+        } else {
+            for (String perm : this.getPermissions()) {
+                if (source.hasPermission(perm) && source.getPermissionValue(source.getActiveContexts(), perm) == Tristate.TRUE) {
+                    return true;
+                }
             }
+            return this.getPermissions().length == 0;
         }
-        return this.getPermissions().length <= 0;
     }
 
     public SpongeCommand toSponge() {
