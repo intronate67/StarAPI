@@ -23,9 +23,6 @@
 package com.gmail.socraticphoenix.sponge.star;
 
 import com.gmail.socraticphoenix.plasma.collection.PlasmaListUtil;
-import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACKeyValue;
-import com.gmail.socraticphoenix.plasma.file.asac.values.ASACValue;
 import com.gmail.socraticphoenix.plasma.file.cif.CIFArray;
 import com.gmail.socraticphoenix.plasma.file.cif.CIFTagCompound;
 import com.gmail.socraticphoenix.plasma.file.cif.CIFValue;
@@ -87,31 +84,6 @@ public class StarUtil {
                 target.query(new SlotIndex(slot)).set(stack);
             }
         }
-    }
-
-    public static void applyInventory(Inventory target, ASACNode inventory) throws IOException {
-        for (ASACKeyValue keyValue : inventory.getAllValues()) {
-            ASACValue value = keyValue.getSingletonValue();
-            if(value.getNodeValue().isPresent()) {
-                ASACNode node = value.getNodeValue().get();
-                int slot = node.getInteger("slot").get();
-                String json = node.getString("item").get();
-                ItemStack stack = StarUtil.deSerializeJson(json, ItemStack.class).get();
-                target.query(new SlotIndex(slot)).set(stack);
-            }
-        }
-    }
-
-    public static ASACNode serializeInventory(Inventory inventory, String nodeName) throws IOException {
-        ASACNode node = new ASACNode(nodeName);
-        for (int i = 0; i < inventory.capacity(); i++) {
-            ItemStack stack = inventory.query(new SlotIndex(i)).peek();
-            ASACNode subItem = new ASACNode("slot".concat(String.valueOf(i)));
-            subItem.put("slot", i);
-            subItem.put("item", StarUtil.serializeToJson(stack.toContainer()));
-            node.addNode(subItem.getName(), subItem);
-        }
-        return node;
     }
 
     public static CIFArray serializeInventory(Inventory inventory) throws IOException {

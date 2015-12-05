@@ -23,7 +23,6 @@
 package com.gmail.socraticphoenix.sponge.star;
 
 import com.gmail.socraticphoenix.plasma.file.FileChannelThread;
-import com.gmail.socraticphoenix.plasma.file.cif.io.CIFException;
 import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCException;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
 import com.gmail.socraticphoenix.sponge.star.chat.command.conversation.ConversationStartCommand;
@@ -32,7 +31,6 @@ import com.gmail.socraticphoenix.sponge.star.chat.conversation.ConversationManag
 import com.gmail.socraticphoenix.sponge.star.minigame.util.CooldownManager;
 import com.gmail.socraticphoenix.sponge.star.plugin.InformationConstants;
 import com.gmail.socraticphoenix.sponge.star.plugin.PluginInformation;
-import com.gmail.socraticphoenix.sponge.star.serialization.asac.ASACSerializers;
 import com.gmail.socraticphoenix.sponge.star.serialization.cif.CIFSerializers;
 import com.google.inject.Inject;
 
@@ -47,9 +45,6 @@ import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import com.gmail.socraticphoenix.sponge.star.plugin.StarPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.ServiceManager;
 
@@ -73,7 +68,6 @@ public class StarMain extends StarPlugin {
         this.conversationManager = new ConversationManager();
         this.cooldownManager = new CooldownManager();
         StarMain.starMain = this;
-        ASACSerializers.init();
         CIFSerializers.init();
         StarArgumentValueConverter.init();
         File infoDir = new File(this.getConfigDir(), "Additional Information");

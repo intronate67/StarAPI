@@ -95,7 +95,7 @@ public abstract class StarPlugin {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < this.authors.length; i++) {
             String author = this.authors[i];
-            if(i != 0 && i == this.authors.length - 2) {
+            if (i != 0 && i == this.authors.length - 2) {
                 builder.append(author).append(" and ");
             } else if (i == this.authors.length - 1) {
                 builder.append(author);
@@ -135,7 +135,9 @@ public abstract class StarPlugin {
     }
 
     public void saveLanguageMapping() throws IOException, JLSCException {
-        new JLSConfiguration(this.languageMapping.toJLSC(), new File(this.configDir, StarLang.LANGUAGE_NAME.toString())).writeToTarget();
+        if (this.languageMapping != null) {
+            new JLSConfiguration(this.languageMapping.toJLSC(), new File(this.configDir, StarLang.LANGUAGE_NAME.toString())).writeToTarget();
+        }
     }
 
     public void saveConfig() throws IOException, JLSCException {
@@ -177,7 +179,7 @@ public abstract class StarPlugin {
 
     private void writeInformationFile() throws IOException {
         File info = new File(this.configDir, StarLang.INFORMATION_NAME.toString());
-        if(!info.exists()) {
+        if (!info.exists()) {
             FileChannelThread thread = new FileChannelThread(info);
             thread.start();
 
@@ -187,7 +189,7 @@ public abstract class StarPlugin {
             thread.write("Id= ".concat(this.id), ls);
             thread.write("Authors= ".concat(this.getHumanReadableAuthorString()), ls, ls);
             thread.write("Description:", ls, this.description, ls, ls);
-            thread.write("Config:", ls, "The config file uses the JLSC format, or JSON-Like Structurec Configuration. The config file is human readable, and generally easy to set values in.", ls, ls);
+            thread.write("Config:", ls, "The config file uses the JLSC format, or JSON-Like Structured Configuration. The config file is human readable, and generally easy to set values in.", ls, ls);
             thread.write("Data:", ls, "The data file uses the CIF format, or Compressed Information Format. It is not human readable, and is intended to store internal information only.");
 
             thread.close();
@@ -195,19 +197,21 @@ public abstract class StarPlugin {
     }
 
     private void initializeLanguage() throws IOException, JLSCException {
-        File language = new File(this.configDir, StarLang.LANGUAGE_NAME.toString());
-        if(language.exists()) {
-            this.languageMapping = LanguageMapping.fromJLSC(JLSCReader.readFromFile(language));
-        } else {
-            this.languageMapping = new LanguageMapping();
-        }
+        if(this.languageMapping == null) {
+            File language = new File(this.configDir, StarLang.LANGUAGE_NAME.toString());
+            if (language.exists()) {
+                this.languageMapping = LanguageMapping.fromJLSC(JLSCReader.readFromFile(language));
+            } else {
+                this.languageMapping = new LanguageMapping();
+            }
 
-        this.saveLanguageMapping();
+            this.saveLanguageMapping();
+        }
     }
 
     private void initializeData() throws IOException, CIFException {
         File data = new File(this.configDir, StarLang.DATA_NAME.toString());
-        if(data.exists()) {
+        if (data.exists()) {
             this.data = CIFUtil.parseFromFile(data, true);
         } else {
             this.data = new CIFTagCompound();
@@ -222,7 +226,7 @@ public abstract class StarPlugin {
         this.configDir = localDir;
         this.configDir.mkdirs();
         File config = new File(localDir, StarLang.CONFIG_NAME.toString());
-        if(config.exists()) {
+        if (config.exists()) {
             this.config = JLSConfiguration.fromFile(config);
         } else {
             this.config = new JLSConfiguration(new JLSCCompound(), config);
@@ -232,8 +236,8 @@ public abstract class StarPlugin {
     }
 
     private void grabFromAnnotation() {
-        for(Annotation annotation : this.getClass().getAnnotations()){
-            if(annotation instanceof Plugin){
+        for (Annotation annotation : this.getClass().getAnnotations()) {
+            if (annotation instanceof Plugin) {
                 Plugin plugin = (Plugin) annotation;
                 this.name = plugin.name();
                 this.version = plugin.version();
@@ -247,8 +251,12 @@ public abstract class StarPlugin {
     }
 
     public abstract void onConstruction();
+
     public abstract void onPreInitialization(GamePreInitializationEvent ev);
+
     public abstract void onInitialization(GameInitializationEvent ev);
+
     public abstract void onServerStopping(GameStoppingServerEvent ev);
+
     public abstract void onServerStopped(GameStoppedServerEvent ev);
 }

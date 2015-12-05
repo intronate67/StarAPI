@@ -56,7 +56,7 @@ public class LanguageMapping {
         JLSCCompound message = new JLSCCompound();
 
         this.messages.keySet().stream().forEach(key -> message.put(key, this.messages.get(key)));
-        this.colors.keySet().stream().forEach(key -> message.put(key, this.colors.get(key).getId()));
+        this.colors.keySet().stream().forEach(key -> color.put(key, this.colors.get(key).getId()));
 
         root.put("Colors", color);
         root.put("Messages", message);

@@ -24,6 +24,8 @@ package com.gmail.socraticphoenix.sponge.star.chat.command;
 
 import com.gmail.socraticphoenix.plasma.collection.KeyValue;
 import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,9 +65,11 @@ public class MainCommand implements CommandCallable {
     public CommandResult process(CommandSource source, String arguments) throws CommandException {
         String[] pieces = arguments.split(" ");
         String command = pieces[0];
-        String[] argPieces = new String[pieces.length - 2];
-        System.arraycopy(pieces, 1, argPieces, 0, pieces.length - 1);
-        String argString = PlasmaStringUtil.join(" ", argPieces);
+        List<String> argPieces = new ArrayList<>();
+        for (int i = 1; i < pieces.length; i++) {
+            argPieces.add(pieces[i]);
+        }
+        String argString = PlasmaStringUtil.join(" ", argPieces.toArray());
 
         Optional<CommandCallable> subCommand = this.getSubCommand(command);
         if(subCommand.isPresent()) {
