@@ -22,12 +22,14 @@
  */
 package com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.converters;
 
+import com.gmail.socraticphoenix.plasma.string.PlasmaStringUtil;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentList;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.StarArgumentValue;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.conversion.StarArgumentValueConverter;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarArgumentTokenizer;
 import com.gmail.socraticphoenix.sponge.star.chat.arguments.parse.StarKeyConsumer;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class ListConverter extends StarArgumentValueConverter<StarArgumentList> {
 
@@ -37,7 +39,7 @@ public class ListConverter extends StarArgumentValueConverter<StarArgumentList> 
 
     @Override
     public StarArgumentList parse(String value) {
-        StarArgumentTokenizer tokenizer = new StarArgumentTokenizer(value, new StarArgumentTokenizer.DefaultHandler(), new StarKeyConsumer());
+        StarArgumentTokenizer tokenizer = new StarArgumentTokenizer(PlasmaStringUtil.cutLastChar(value.replaceFirst(Pattern.quote("["), "")), new StarArgumentTokenizer.DefaultHandler(), new StarKeyConsumer());
         StarArgumentList list = new StarArgumentList();
         while (tokenizer.hasNext()) {
             Optional<StarArgumentValue> next = tokenizer.nextValue();

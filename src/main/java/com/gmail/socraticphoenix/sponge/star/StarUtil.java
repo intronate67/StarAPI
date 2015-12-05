@@ -53,7 +53,7 @@ import org.spongepowered.api.util.persistence.SerializationManager;
 public class StarUtil {
 
     public static Optional<User> getOfflinePlayer(UUID id) {
-        GameProfileManager resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileManager.class);
+        GameProfileManager resolver = Star.getServer().getGameProfileManager();
         UserStorageService storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         try {
             return storage.get(resolver.get(id).get());
@@ -64,7 +64,7 @@ public class StarUtil {
     }
 
     public static Optional<User> getOfflinePlayer(String name) {
-        GameProfileManager resolver = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(GameProfileManager.class);
+        GameProfileManager resolver = Star.getServer().getGameProfileManager();
         UserStorageService storage = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         try {
             return storage.get(resolver.get(name).get());
@@ -122,7 +122,7 @@ public class StarUtil {
 
     public static <T extends DataSerializable> Optional<T> deSerializeJson(String json, Class<T> type) throws IOException {
         DataView target = ConfigurateTranslator.instance().translateFrom(GsonConfigurationLoader.builder().setSource(() -> new BufferedReader(new StringReader(json))).build().load());
-        SerializationManager service = StarMain.getOperatingInstance().getGame().getServiceManager().provideUnchecked(SerializationManager.class);
+        SerializationManager service = Star.getGame().getSerializationManager();
         return service.deserialize(type, target);
     }
 
