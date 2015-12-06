@@ -41,6 +41,10 @@ public class Verifiers {
         return Verifiers.successful;
     }
 
+    public static Verifier listVerifier(Verifier valueVerifier) {
+        return new ListVerifier(valueVerifier);
+    }
+
     public static Verifier onlinePlayer() {
         return new PlayerVerifier(true);
     }
