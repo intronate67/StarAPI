@@ -40,7 +40,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 public class ConversationListener {
 
-    @Listener(ignoreCancelled = false, beforeModifications = true, order = Order.LAST)
+    @Listener(beforeModifications = true, order = Order.LAST)
     public void onChat(MessageSinkEvent.Chat event) {
         ConversationManager manager = StarMain.getOperatingInstance().getConversationManager();
         Cause cause = event.getCause();
@@ -56,7 +56,7 @@ public class ConversationListener {
         }
     }
 
-    @Listener(ignoreCancelled = false, beforeModifications = true, order = Order.LAST)
+    @Listener(beforeModifications = true, order = Order.LAST)
     public void onConsoleChat(SendCommandEvent event) {
         ConversationManager manager = StarMain.getOperatingInstance().getConversationManager();
         Cause cause = event.getCause();

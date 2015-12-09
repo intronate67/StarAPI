@@ -34,8 +34,8 @@ import org.spongepowered.api.event.block.GrowBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.MoveBlockEvent;
 import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -57,7 +57,7 @@ public class LobbyListener {
     public void onDamage(DamageEntityEvent event) {
         if(this.lobby.is(event.getTargetEntity().getWorld())) {
             event.setCancelled(true);
-            if (event.getCause().any(DamageSource.class) && event.getCause().first(DamageSource.class).get() == DamageSources.VOID && event.getTargetEntity() instanceof Player) {
+            if (event.getCause().any(DamageSource.class) && event.getCause().first(DamageSource.class).get().getType() == DamageTypes.VOID && event.getTargetEntity() instanceof Player) {
                 event.getTargetEntity().setLocation(this.lobby.getSpawn());
             }
         }

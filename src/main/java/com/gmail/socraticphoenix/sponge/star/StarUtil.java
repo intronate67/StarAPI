@@ -35,9 +35,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
@@ -48,7 +50,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.service.user.UserStorageService;
-import org.spongepowered.api.util.persistence.SerializationManager;
 
 public class StarUtil {
 
@@ -109,7 +110,6 @@ public class StarUtil {
             return slots;
         }
     }
-
     public static String toJson(ConfigurationNode node) throws IOException {
         StringWriter writer = new StringWriter();
         GsonConfigurationLoader.builder().build().saveInternal(node, writer);
@@ -122,8 +122,8 @@ public class StarUtil {
 
     public static <T extends DataSerializable> Optional<T> deSerializeJson(String json, Class<T> type) throws IOException {
         DataView target = ConfigurateTranslator.instance().translateFrom(GsonConfigurationLoader.builder().setSource(() -> new BufferedReader(new StringReader(json))).build().load());
-        SerializationManager service = Star.getGame().getSerializationManager();
-        return service.deserialize(type, target);
+        DataManager manager = Star.getGame().getDataManager();
+        return manager.deserialize(type, target);
     }
 
 }

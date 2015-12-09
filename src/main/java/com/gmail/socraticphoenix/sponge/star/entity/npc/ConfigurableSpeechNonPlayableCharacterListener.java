@@ -35,7 +35,7 @@ public class ConfigurableSpeechNonPlayableCharacterListener {
         this.character = character;
     }
 
-    @org.spongepowered.api.event.Listener(ignoreCancelled = false, order = Order.LATE)
+    @org.spongepowered.api.event.Listener(order = Order.LATE)
     public void onInteract(InteractEntityEvent ev) {
         if (ev.getCause().root().isPresent() && ev.getCause().root().get() instanceof Player) {
             Player cause = (Player) ev.getCause().root().get();
