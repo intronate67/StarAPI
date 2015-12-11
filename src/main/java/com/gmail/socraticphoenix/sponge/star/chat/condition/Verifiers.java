@@ -105,6 +105,10 @@ public class Verifiers {
         return new CatalogTypeVerifier(target);
     }
 
+    public static Verifier uuid() {
+        return new UuidVerifier();
+    }
+
     public static Verifier or(Verifier... verifiers) {
         return new Or(verifiers);
     }
