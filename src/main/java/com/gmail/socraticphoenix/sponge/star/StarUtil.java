@@ -75,41 +75,6 @@ public class StarUtil {
         return Optional.empty();
     }
 
-    public static void applyInventory(Inventory target, CIFArray inventory) throws IOException {
-        for (CIFValue value : inventory) {
-            if(value.getCompound().isPresent()) {
-                CIFTagCompound compound = (CIFTagCompound) value.getValue();
-                int slot = compound.getInteger("slot").get().getValue();
-                String json = compound.getString("item").get().getValue();
-                ItemStack stack = StarUtil.deSerializeJson(json, ItemStack.class).get();
-                target.query(new SlotIndex(slot)).set(stack);
-            }
-        }
-    }
-
-    public static CIFArray serializeInventory(Inventory inventory) throws IOException {
-        CIFArray array = new CIFArray();
-        for (int i = 0; i < inventory.capacity(); i++) {
-            ItemStack stack = inventory.query(new SlotIndex(i)).peek();
-            CIFTagCompound subItem = new CIFTagCompound();
-            subItem.put("slot", i);
-            subItem.put("item", StarUtil.serializeToJson(stack.toContainer()));
-            array.add(CIFValue.of(subItem));
-        }
-        return array;
-    }
-
-    public static List<Slot> getSlots(Inventory inventory) {
-        if(inventory instanceof Slot) {
-            return PlasmaListUtil.buildList((Slot)inventory);
-        } else {
-            List<Slot> slots = new ArrayList<>();
-            for(Inventory inv : inventory.slots()) {
-                slots.addAll(StarUtil.getSlots(inv));
-            }
-            return slots;
-        }
-    }
     public static String toJson(ConfigurationNode node) throws IOException {
         StringWriter writer = new StringWriter();
         GsonConfigurationLoader.builder().build().saveInternal(node, writer);

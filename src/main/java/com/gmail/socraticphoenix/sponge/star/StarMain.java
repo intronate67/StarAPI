@@ -73,16 +73,9 @@ public class StarMain extends StarPlugin {
         StarArgumentValueConverter.init();
         File infoDir = new File(this.getConfigDir(), "Additional Information");
         infoDir.mkdirs();
-        File cifSpec = new File(infoDir, "CIF Specification.txt");
         File jlscSpec = new File(infoDir, "JLSC Specification.txt");
         File argsSpec = new File(infoDir, "StarArguments Specification.txt");
         try {
-            if(!cifSpec.exists()) {
-                FileChannelThread thread = new FileChannelThread(cifSpec);
-                thread.start();
-                thread.write(InformationConstants.CIF_SPEC);
-                thread.close();
-            }
             if(!jlscSpec.exists()) {
                 FileChannelThread thread = new FileChannelThread(jlscSpec);
                 thread.start();

@@ -24,6 +24,7 @@ package com.gmail.socraticphoenix.sponge.star.chat;
 
 import com.gmail.socraticphoenix.plasma.math.PlasmaRandomUtil;
 import com.gmail.socraticphoenix.sponge.star.Star;
+import com.gmail.socraticphoenix.sponge.star.plugin.StarPlugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
@@ -103,6 +104,19 @@ public class MessageBuilder {
     public MessageBuilder appendLegacy(String... strings) {
         Stream.of(strings).forEach(string -> this.append(Texts.legacy('&').fromUnchecked(string)));
         return this;
+    }
+
+    public MessageBuilder color(StarPlugin plugin, String name, TextColor def) {
+        this.color(plugin.getLanguageMapping().query(name, def));
+        return this;
+    }
+
+    public MessageBuilder highlight(String text, TextColor highlight) {
+        return this.sub().append(text).color(highlight).parent();
+    }
+
+    public MessageBuilder highlight(String text) {
+        return this.highlight(text, this.getRandomColor());
     }
 
     private TextColor getRandomColor() {

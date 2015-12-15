@@ -32,6 +32,7 @@ import com.gmail.socraticphoenix.plasma.file.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Serializable
 public class NameHistoryQueryResult {
@@ -39,18 +40,21 @@ public class NameHistoryQueryResult {
     private int code;
     @Serialize(name = "successful")
     private boolean successful;
+    @Serialize(name = "id")
+    private UUID id;
     @Serialize(name = "response")
     private JSONObject response;
     private String currentName;
     private List<NameEntry> previousNames;
 
-    public NameHistoryQueryResult(ApiQueryResult result) {
-        this(result.getResponse(), result.getCode(), result.isSuccessful());
+    public NameHistoryQueryResult(ApiQueryResult result, UUID id) {
+        this(result.getResponse(), result.getCode(), result.isSuccessful(), id);
     }
 
-    @SerializationConstructor(mappings = {@Mapping(fieldName = "responseCode", parameterIndex = 1), @Mapping(fieldName = "successful", parameterIndex = 2), @Mapping(fieldName = "response", parameterIndex = 0)})
-    public NameHistoryQueryResult(JSONObject response, int code, boolean successful) {
+    @SerializationConstructor(mappings = {@Mapping(fieldName = "responseCode", parameterIndex = 1), @Mapping(fieldName = "successful", parameterIndex = 2), @Mapping(fieldName = "response", parameterIndex = 0), @Mapping(fieldName = "id", parameterIndex = 3)})
+    public NameHistoryQueryResult(JSONObject response, int code, boolean successful, UUID id) {
         ApiQueryResult wrapping = new ApiQueryResult(response, code, successful);
+        this.id = id;
         this.code = wrapping.getCode();
         this.successful = wrapping.isSuccessful();
         this.response = wrapping.getResponse();
@@ -68,6 +72,10 @@ public class NameHistoryQueryResult {
                 }
             });
         }
+    }
+
+    public UUID getUuid() {
+        return this.id;
     }
 
     public int getCode() {

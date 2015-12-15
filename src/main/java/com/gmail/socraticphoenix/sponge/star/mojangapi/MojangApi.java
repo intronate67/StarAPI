@@ -22,9 +22,10 @@
  */
 package com.gmail.socraticphoenix.sponge.star.mojangapi;
 
-import com.gmail.socraticphoenix.plasma.file.cif.CIFTagCompound;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCCompound;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSConfiguration;
+import com.gmail.socraticphoenix.plasma.file.jlsc.value.JLSCPair;
 import com.gmail.socraticphoenix.plasma.file.json.JSONException;
-import com.gmail.socraticphoenix.plasma.file.json.JSONObject;
 import com.gmail.socraticphoenix.plasma.file.json.JSONParser;
 import com.gmail.socraticphoenix.sponge.star.Star;
 
@@ -44,7 +45,6 @@ public class MojangApi {
     public static final String STATS_URL = "https://status.mojang.com/check";
     public static final String NAME_HISTORY_QUERY_URL = "https://api.mojang.com/user/profiles/%var%/names";
     public static final String UUID_QUERY_URL = "https://api.mojang.com/users/profiles/minecraft/%var%";
-    public static final String PROFILE_QUERY_URL = "https://sessionserver.mojang.com/sesssion/minecraft/profile/%var%";
 
     public static SiteStatusQueryResult getWebsiteStatus() throws IOException, JSONException {
         return new SiteStatusQueryResult(MojangApi.fromUrl(MojangApi.STATS_URL));
@@ -55,7 +55,7 @@ public class MojangApi {
         if (resultOptional.isPresent()) {
             return resultOptional.get();
         } else {
-            NameHistoryQueryResult historyQueryResult = new NameHistoryQueryResult(MojangApi.fromUrl(MojangApi.NAME_HISTORY_QUERY_URL.replaceAll("%var%", uuid.toString().replaceAll("-", ""))));
+            NameHistoryQueryResult historyQueryResult = new NameHistoryQueryResult(MojangApi.fromUrl(MojangApi.NAME_HISTORY_QUERY_URL.replaceAll("%var%", uuid.toString().replaceAll("-", ""))), uuid);
             MojangApi.cache(historyQueryResult);
             return historyQueryResult;
         }
@@ -78,28 +78,37 @@ public class MojangApi {
 
 
     private static void cache(UuidQueryResult result) {
-        CIFTagCompound cache = MojangApi.getCache();
-
+        CacheEntry<UuidQueryResult> entry = new CacheEntry<>(result);
+        MojangApi.getCache(result.getUuid()).put("UuidQuery", entry);
+        MojangApi.getCache(result.getUuid()).put("Name", result.getCurrentName());
     }
 
     private static void cache(NameHistoryQueryResult result) {
-        CIFTagCompound cache = MojangApi.getCache();
-
-    }
-
-    private static void cache(ProfileQueryResult result) {
-
+        CacheEntry<NameHistoryQueryResult> entry = new CacheEntry<>(result);
+        MojangApi.getCache(result.getUuid()).put("NameQuery", entry);
+        MojangApi.getCache(result.getUuid()).put("Name", result.getCurrentName());
     }
 
     private static Optional<UuidQueryResult> getCachedUuid(String name) {
+        JLSCCompound cache = MojangApi.getCache();
+        Optional<JLSCPair> pairOptional = cache.stream().filter(pair -> pair.getAsCompound().isPresent() && pair.getAsCompound().get().getString("Name").isPresent() && pair.getAsCompound().get().getString("Name").get().equalsIgnoreCase(name)).findFirst();
+        if(pairOptional.isPresent()) {
+            CacheEntry<UuidQueryResult> entry = (CacheEntry<UuidQueryResult>) pairOptional.get().getValueAs(CacheEntry.class).get();
+            if(!entry.isExpired()) {
+                return Optional.of(entry.getValue());
+            }
+        }
         return Optional.empty();
     }
 
     private static Optional<NameHistoryQueryResult> getCachedNameHistory(UUID uuid) {
-        return Optional.empty();
-    }
-
-    private static Optional<ApiQueryResult> getCachedProfile(UUID uuid) {
+        JLSCCompound cache = MojangApi.getCache(uuid);
+        if(cache.getAs("NameQuery", CacheEntry.class).isPresent()) {
+            CacheEntry<NameHistoryQueryResult> entry = (CacheEntry<NameHistoryQueryResult>) cache.getAs("NameQeury", CacheEntry.class).get();
+            if(!entry.isExpired()) {
+                return Optional.of(entry.getValue());
+            }
+        }
         return Optional.empty();
     }
 
@@ -132,13 +141,25 @@ public class MojangApi {
         return builder.toString();
     }
 
-    private static CIFTagCompound getCache() {
-        CIFTagCompound data = Star.getStarMain().getData();
-        CIFTagCompound cache;
-        if (data.getCompound("cache").isPresent()) {
-            cache = data.getCompound("cache").get().getValue();
+    private static JLSCCompound getCache(UUID id) {
+        JLSCCompound cache = MojangApi.getCache();
+        JLSCCompound subCache;
+        if(cache.getCompound(id.toString()).isPresent()) {
+            subCache = cache.getCompound(id.toString()).get();
         } else {
-            cache = new CIFTagCompound();
+            subCache = new JLSCCompound();
+            cache.put(id.toString(), subCache);
+        }
+        return subCache;
+    }
+
+    private static JLSCCompound getCache() {
+        JLSConfiguration data = Star.getStarMain().getData();
+        JLSCCompound cache;
+        if (data.getCompound("cache").isPresent()) {
+            cache = data.getCompound("cache").get();
+        } else {
+            cache = new JLSCCompound();
             data.put("cache", cache);
         }
 

@@ -23,6 +23,7 @@
 package com.gmail.socraticphoenix.sponge.star.entity.npc;
 
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCCompound;
 import com.gmail.socraticphoenix.plasma.math.PlasmaRandomUtil;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
 import org.spongepowered.api.entity.Entity;
@@ -44,7 +45,7 @@ public class ConfigurableSpeechNonPlayableCharacter implements NonPlayableCharac
     private UnmovingNonPlayableCharacter wrapped;
     private String speech;
 
-    public ConfigurableSpeechNonPlayableCharacter(ASACNode node, World world) {
+    public ConfigurableSpeechNonPlayableCharacter(JLSCCompound node, World world) {
         if (! (node.getString("name").isPresent() && node.getString("location").isPresent() && node.getString("type").isPresent() && node.getString("speech").isPresent())) {
             throw new IllegalArgumentException("Cannot create a ConfigurableSpeechNonPlayableCharacter from an ASACNode lacking one of the following keys: name, location, type, speech");
         }

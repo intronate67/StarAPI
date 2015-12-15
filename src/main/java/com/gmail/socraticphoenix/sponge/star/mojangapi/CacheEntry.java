@@ -22,5 +22,40 @@
  */
 package com.gmail.socraticphoenix.sponge.star.mojangapi;
 
-public class ProfileQueryResult {
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.Serializable;
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.Serialize;
+
+import java.util.concurrent.TimeUnit;
+
+@Serializable
+public class CacheEntry<T> {
+    public static long EXPIRED_THRESHOLD = TimeUnit.HOURS.toMillis(6);
+
+    @Serialize(name = "value")
+    private T value;
+    @Serialize(name = "timestamp")
+    private long timestamp;
+
+    public CacheEntry(T value) {
+        this.value = value;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public CacheEntry(T value, long timestamp) {
+        this.value = value;
+        this.timestamp = timestamp;
+    }
+
+    public T getValue() {
+        return this.value;
+    }
+
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
+    public boolean isExpired() {
+        return (System.currentTimeMillis() - this.getTimestamp() >= CacheEntry.EXPIRED_THRESHOLD);
+    }
+
 }

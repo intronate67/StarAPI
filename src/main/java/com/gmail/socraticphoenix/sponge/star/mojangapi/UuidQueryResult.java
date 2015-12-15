@@ -22,18 +22,32 @@
  */
 package com.gmail.socraticphoenix.sponge.star.mojangapi;
 
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.Mapping;
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.Serializable;
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.SerializationConstructor;
+import com.gmail.socraticphoenix.plasma.file.jlsc.serialization.annotation.Serialize;
 import com.gmail.socraticphoenix.plasma.file.json.JSONObject;
 
 import java.util.UUID;
 
+@Serializable
 public class UuidQueryResult {
+    @Serialize(name = "responseCode")
     private int code;
+    @Serialize(name = "successful")
     private boolean successful;
+    @Serialize(name = "response")
     private JSONObject response;
     private UUID id;
     private String currentName;
 
-    public UuidQueryResult(ApiQueryResult wrapping) {
+    public UuidQueryResult(ApiQueryResult result) {
+        this(result.getResponse(), result.getCode(), result.isSuccessful());
+    }
+
+    @SerializationConstructor(mappings = {@Mapping(fieldName = "responseCode", parameterIndex = 1), @Mapping(fieldName = "successful", parameterIndex = 2), @Mapping(fieldName = "response", parameterIndex = 0)})
+    public UuidQueryResult(JSONObject response, int code, boolean successful) {
+        ApiQueryResult wrapping = new ApiQueryResult(response, code, successful);
         this.code = wrapping.getCode();
         this.successful = wrapping.isSuccessful();
         this.response = wrapping.getResponse();

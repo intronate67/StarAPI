@@ -24,6 +24,8 @@ package com.gmail.socraticphoenix.sponge.star.map.lobby;
 
 import com.gmail.socraticphoenix.plasma.file.asac.ASACNode;
 import com.gmail.socraticphoenix.plasma.file.asac.ASACParser;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSCCompound;
+import com.gmail.socraticphoenix.plasma.file.jlsc.JLSConfiguration;
 import com.gmail.socraticphoenix.plasma.math.PlasmaRandomUtil;
 import com.gmail.socraticphoenix.sponge.star.Star;
 import com.gmail.socraticphoenix.sponge.star.StarMain;
@@ -49,7 +51,7 @@ public class Lobby {
     private LobbyListener listener;
     private UnmovingNonPlayableCharacter kitNpc;
     private UnmovingNonPlayableCharacter teamNpc;
-    private ASACNode config;
+    private JLSConfiguration config;
     private List<NonPlayableCharacter> characterList;
 
     public Lobby(World world) {
@@ -58,10 +60,10 @@ public class Lobby {
         this.characterList = new ArrayList<>();
         this.spawn = world.getSpawnLocation();
         File worldFolder = Star.getWorldFile(world);
-        File configFile = new File(worldFolder, "lobby.txt");
+        File configFile = new File(worldFolder, "lobby.jlsc");
         if(configFile.exists()) {
             try {
-                this.config = ASACParser.parseFile(configFile, null);
+                this.config = JLSConfiguration.fromFile(configFile);
                 this.config.writeToFile(configFile);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
@@ -72,7 +74,7 @@ public class Lobby {
             }
 
         } else {
-            this.config = new ASACNode("Lobby");
+            this.config = new JLSConfiguration(new JLSCCompound(), configFile);
         }
         this.initializeFromConfig();
         StarMain.getOperatingInstance().getGame().getEventManager().registerListeners(StarMain.getOperatingInstance(), this.listener);
@@ -119,8 +121,8 @@ public class Lobby {
             this.teamNpc = new UnmovingNonPlayableCharacter(this.generateLocation(this.config.getString("teamNPC").get(), this.world), EntityTypes.VILLAGER, Texts.builder("Choose a Team").color(this.randomColor()).build());
         }
 
-        if(this.config.getNode("Animals").isPresent()) {
-            this.characterList.addAll(this.config.getNode("Animals").get().getChildren().stream().map(node -> new ConfigurableSpeechNonPlayableCharacter(node, this.world)).collect(Collectors.toList()));
+        if(this.config.getCompound("Animals").isPresent()) {
+            this.characterList.addAll(this.config.getCompound("Animals").get().stream().filter(test -> test.getAsCompound().isPresent()).map(pair -> new ConfigurableSpeechNonPlayableCharacter(pair.getAsCompound().get(), this.world)).collect(Collectors.toList()));
         }
     }
 

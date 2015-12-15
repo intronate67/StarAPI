@@ -26,7 +26,7 @@ public enum  StarLang {
     MOD_DIR("mods"),
     CONFIG_DIR("config"),
     CONFIG_NAME("config.jlsc"),
-    DATA_NAME("data.cif"),
+    DATA_NAME("data.cjlsc"),
     INFORMATION_NAME("info.txt"),
     LANGUAGE_NAME("lang.jlsc")
 

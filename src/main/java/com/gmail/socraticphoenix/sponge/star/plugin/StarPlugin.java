@@ -51,7 +51,7 @@ import java.lang.annotation.Annotation;
 
 public abstract class StarPlugin {
     private JLSConfiguration config;
-    private CIFTagCompound data;
+    private JLSConfiguration data;
     private LanguageMapping languageMapping;
 
     private Logger logger;
@@ -148,7 +148,7 @@ public abstract class StarPlugin {
         this.config.loadFromTarget();
     }
 
-    public CIFTagCompound getData() {
+    public JLSConfiguration getData() {
         return this.data;
     }
 
@@ -161,8 +161,8 @@ public abstract class StarPlugin {
         return this.languageMapping;
     }
 
-    public void saveData() throws IOException {
-        CIFUtil.writeToFile(new File(this.configDir, StarLang.DATA_NAME.toString()), this.data, true);
+    public void saveData() throws IOException, JLSCException {
+        this.data.writeCompressedToTarget();
     }
 
     private void initializeLogger() {
@@ -173,7 +173,7 @@ public abstract class StarPlugin {
 
     }
 
-    protected void putDefaultDataValues(CIFTagCompound data) {
+    protected void putDefaultDataValues(JLSConfiguration data) {
 
     }
 
@@ -190,7 +190,7 @@ public abstract class StarPlugin {
             thread.write("Authors= ".concat(this.getHumanReadableAuthorString()), ls, ls);
             thread.write("Description:", ls, this.description, ls, ls);
             thread.write("Config:", ls, "The config file uses the JLSC format, or JSON-Like Structured Configuration. The config file is human readable, and generally easy to set values in.", ls, ls);
-            thread.write("Data:", ls, "The data file uses the CIF format, or Compressed Information Format. It is not human readable, and is intended to store internal information only.");
+            thread.write("Data:", ls, "The data file also uses the JLSC format, however it is its compressed form. Compressed JLSC is not human readable, and is meant for internal storage only.");
 
             thread.close();
         }
@@ -209,15 +209,15 @@ public abstract class StarPlugin {
         }
     }
 
-    private void initializeData() throws IOException, CIFException {
+    private void initializeData() throws IOException, JLSCException {
         File data = new File(this.configDir, StarLang.DATA_NAME.toString());
         if (data.exists()) {
-            this.data = CIFUtil.parseFromFile(data, true);
+            this.data = JLSConfiguration.fromCompressedFile(data);
         } else {
-            this.data = new CIFTagCompound();
+            this.data = new JLSConfiguration(new JLSCCompound(), data);
             this.putDefaultDataValues(this.data);
         }
-        CIFUtil.writeToFile(data, this.data, true);
+        this.saveData();
     }
 
     private void initializeConfig() throws IOException, JLSCException {

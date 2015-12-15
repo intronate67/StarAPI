@@ -9,7 +9,7 @@ apply plugin: 'idea'
 //End Plugins
 
 //Program Specific Variables (Fill thses in)
-def programVersion = "0.0.11"
+def programVersion = "0.0.13"
 def programGroup = "com.gmail.socraticphoenix.sponge"
 def programName = "StarAPI"
 def repoName = "Main"
@@ -46,7 +46,7 @@ repositories {
 
 dependencies {
     compile "org.spongepowered:spongeapi:2.1-SNAPSHOT"
-    shadow "com.gmail.socraticphoenix:PlasmaAPI:0.0.14"
+    shadow "com.gmail.socraticphoenix:PlasmaAPI:0.0.17"
 }
 //End Repositories and Dependencies
 
