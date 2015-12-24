@@ -57,7 +57,7 @@ public class LobbyListener {
     public void onDamage(DamageEntityEvent event) {
         if(this.lobby.is(event.getTargetEntity().getWorld())) {
             event.setCancelled(true);
-            if (event.getCause().any(DamageSource.class) && event.getCause().first(DamageSource.class).get().getType() == DamageTypes.VOID && event.getTargetEntity() instanceof Player) {
+            if (event.getCause().containsType(DamageSource.class) && event.getCause().first(DamageSource.class).get().getType() == DamageTypes.VOID && event.getTargetEntity() instanceof Player) {
                 event.getTargetEntity().setLocation(this.lobby.getSpawn());
             }
         }
@@ -107,7 +107,7 @@ public class LobbyListener {
 
     @Listener
     public void onSpawn(SpawnEntityEvent ev) {
-        if(this.lobby.is(ev.getTargetWorld()) && !ev.getCause().any(StarMain.class)) {
+        if(this.lobby.is(ev.getTargetWorld()) && !ev.getCause().containsType(StarMain.class)) {
             ev.setCancelled(true);
         }
     }
@@ -150,8 +150,8 @@ public class LobbyListener {
     @Listener
     public void onInteractEntity(InteractEntityEvent ev) {
         if (this.lobby.is(ev.getTargetEntity().getLocation().getExtent())) {
-            if (ev.getCause().root().isPresent() && ev.getCause().root().get() instanceof Player) {
-                Player player = (Player) ev.getCause().root().get();
+            if (ev.getCause().root() instanceof Player) {
+                Player player = (Player) ev.getCause().root();
                 Entity entity = ev.getTargetEntity();
                 LobbyEvent toCall;
                 if (this.lobby.getKitNpc().isPresent() && this.lobby.getKitNpc().get().getEntity().getUniqueId().equals(entity.getUniqueId())) {

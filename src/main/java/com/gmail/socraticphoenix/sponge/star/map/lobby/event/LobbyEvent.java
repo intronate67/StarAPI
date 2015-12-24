@@ -26,12 +26,12 @@ import com.gmail.socraticphoenix.sponge.star.StarMain;
 import com.gmail.socraticphoenix.sponge.star.map.lobby.Lobby;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.GameEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.event.world.TargetWorldEvent;
 import org.spongepowered.api.world.World;
 
-public abstract class LobbyEvent extends AbstractEvent implements TargetWorldEvent, GameEvent {
+public abstract class LobbyEvent extends AbstractEvent implements TargetWorldEvent {
     private Lobby lobby;
 
     public LobbyEvent(Lobby lobby) {
@@ -48,7 +48,6 @@ public abstract class LobbyEvent extends AbstractEvent implements TargetWorldEve
         return this.lobby.getWorld();
     }
 
-    @Override
     public Game getGame() {
         return StarMain.getOperatingInstance().getGame();
     }
@@ -62,6 +61,11 @@ public abstract class LobbyEvent extends AbstractEvent implements TargetWorldEve
 
         public Player getPlayer() {
             return this.player;
+        }
+
+        @Override
+        public Cause getCause() {
+            return Cause.of(this.player);
         }
 
         public static class Team extends PlayerInteract {
@@ -89,6 +93,11 @@ public abstract class LobbyEvent extends AbstractEvent implements TargetWorldEve
 
         public Player getPlayer() {
             return this.player;
+        }
+
+        @Override
+        public Cause getCause() {
+            return Cause.of(this.player);
         }
 
         public static class Join extends PlayerConnect {
